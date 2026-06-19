@@ -3814,3 +3814,125 @@ svg {
 @keyframes dotpad-spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Phase 1: consolidated header + single operating bar ─────────────── */
+.topbar {
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  padding: 0 28px;
+}
+.topbar .top-actions {
+  justify-content: flex-end;
+}
+
+.mode-toggle {
+  justify-self: center;
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line-soft);
+  border-radius: 11px;
+  background: var(--surface-subtle);
+}
+.mode-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 13px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.mode-toggle button.active {
+  background: var(--surface-solid);
+  color: var(--ink-strong);
+  box-shadow: var(--shadow-xs);
+}
+.mode-toggle button.active svg { color: var(--accent); }
+
+.opbar {
+  position: sticky;
+  z-index: 40;
+  top: 76px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 11px 28px;
+  border-bottom: 1px solid var(--line-soft);
+  background: rgba(247, 249, 251, .88);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.opbar-lesson {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line-soft);
+  border-radius: 11px;
+  background: #e9eef1;
+}
+.opbar-lesson .lesson-tab {
+  min-width: 0;
+  padding: 7px 11px;
+  font-size: 11px;
+}
+
+.opbar-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 420px;
+  flex-wrap: wrap;
+}
+.step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 5px 12px 5px 5px;
+  background: var(--surface-solid);
+  color: var(--ink-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.step-chip:hover { border-color: var(--line); color: var(--ink); }
+.step-chip.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--ink-strong);
+}
+.step-chip.done { color: var(--ink); }
+.step-dot {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-subtle);
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.step-chip.active .step-dot { background: var(--accent); color: #fff; }
+.step-chip.done .step-dot { background: var(--accent-soft); color: var(--accent); }
+.step-chip-label { white-space: nowrap; }
+
+.opbar .next-step {
+  margin-left: auto;
+  font-size: 12px;
+  padding: 9px 15px;
+  border-radius: 10px;
+}

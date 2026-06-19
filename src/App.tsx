@@ -29,7 +29,6 @@ import {
   Type,
   Volume2,
   Waves,
-  Zap,
 } from 'lucide-react'
 import { demoSteps, lessons, type Lesson, type LessonId } from './data'
 import { useSupabaseTracking, type SyncState } from './hooks/useSupabaseTracking'
@@ -71,7 +70,6 @@ function App() {
   } = useSupabaseTracking()
 
   const lesson = lessons.find((item) => item.id === lessonId) ?? lessons[0]
-  const currentStep = demoSteps[activeStep - 1]
 
   useEffect(() => {
     if (initializedSessions.current.has(sessionId)) return
@@ -308,13 +306,23 @@ function App() {
           </div>
         </div>
 
-        <div className="partnership-message">
-          <span className="partner ufit">UFIT</span>
-          <span className="message-copy">
-            <strong>UFIT provides the digital science classroom.</strong>
-            <span>Dot provides the accessibility engine.</span>
-          </span>
-          <span className="partner dot">dot.</span>
+        <div className="mode-toggle" role="tablist" aria-label="Accessibility experience mode">
+          <button
+            className={experienceMode === 'live' ? 'active' : ''}
+            onClick={() => changeExperienceMode('live')}
+            role="tab"
+            aria-selected={experienceMode === 'live'}
+          >
+            <Radio size={14} /> Live Classroom
+          </button>
+          <button
+            className={experienceMode === 'recorded' ? 'active' : ''}
+            onClick={() => changeExperienceMode('recorded')}
+            role="tab"
+            aria-selected={experienceMode === 'recorded'}
+          >
+            <MonitorPlay size={14} /> Recorded Lecture
+          </button>
         </div>
 
         <div className="top-actions">
@@ -326,111 +334,52 @@ function App() {
             error={lastError}
             onRetry={() => void retry()}
           />
-          <div className="live-pill"><span /> LIVE PoC</div>
-          <div className="region-pill">São Paulo · BR</div>
         </div>
       </header>
 
-      <section className="experience-switchbar">
-        <div>
-          <span>ACCESSIBILITY ENGINE MODE</span>
-          <div className="experience-switch" role="tablist" aria-label="Accessibility experience mode">
-            <button
-              className={experienceMode === 'live' ? 'active' : ''}
-              onClick={() => changeExperienceMode('live')}
-              role="tab"
-              aria-selected={experienceMode === 'live'}
-            >
-              <Radio size={14} /> Live Classroom
-            </button>
-            <button
-              className={experienceMode === 'recorded' ? 'active' : ''}
-              onClick={() => changeExperienceMode('recorded')}
-              role="tab"
-              aria-selected={experienceMode === 'recorded'}
-            >
-              <MonitorPlay size={14} /> Recorded Lecture
-            </button>
-          </div>
-        </div>
-        <p>
-          <strong>One Dot Lens engine.</strong>
-          {experienceMode === 'live'
-            ? ' Real-time accessibility for the classroom.'
-            : ' Timeline-synchronized accessibility for online lectures.'}
-        </p>
-        <div className={`mode-state ${experienceMode}`}>
-          {experienceMode === 'live' ? <Radio size={13} /> : <MonitorPlay size={13} />}
-          {experienceMode === 'live' ? 'LIVE INPUT' : 'RECORDED MEDIA'}
-        </div>
-      </section>
-
       {experienceMode === 'live' ? (
         <>
-          <section className="control-strip">
-            <div className="lesson-control">
-              <span className="control-label">SCIENCE LESSON</span>
-              <div className="lesson-tabs" role="tablist" aria-label="Science lessons">
-                {lessons.map((item) => (
-                  <button
-                    key={item.id}
-                    className={item.id === lessonId ? 'lesson-tab active' : 'lesson-tab'}
-                    onClick={() => changeLesson(item.id)}
-                    role="tab"
-                    aria-selected={item.id === lessonId}
-                  >
-                    <span>{item.index}</span>
-                    {item.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="sync-state">
-              <Zap size={14} />
-              <span>Lens sync</span>
-              <strong>34 ms</strong>
-            </div>
-          </section>
-
-          <section className="demo-steps" aria-label="Demo steps">
-            <div className="step-heading">
-              <span>DEMO FLOW</span>
-              <strong>Step {activeStep} of 6</strong>
-            </div>
-            <div className="step-track">
-              {demoSteps.map((step, index) => (
+          <section className="opbar" aria-label="Lesson and demo controls">
+            <div className="opbar-lesson" role="tablist" aria-label="Science lessons">
+              {lessons.map((item) => (
                 <button
-                  key={step.number}
-                  className={`step-button ${activeStep === step.number ? 'active' : ''} ${activeStep > step.number ? 'done' : ''}`}
-                  onClick={() => selectStep(step.number)}
-                  aria-current={activeStep === step.number ? 'step' : undefined}
+                  key={item.id}
+                  className={item.id === lessonId ? 'lesson-tab active' : 'lesson-tab'}
+                  onClick={() => changeLesson(item.id)}
+                  role="tab"
+                  aria-selected={item.id === lessonId}
                 >
-                  <span className="step-number">
-                    {activeStep > step.number ? <Check size={13} strokeWidth={3} /> : step.number}
-                  </span>
-                  <span className="step-copy">
-                    <small>STEP {step.number}</small>
-                    <strong>{step.short}</strong>
-                  </span>
-                  {index < demoSteps.length - 1 && <ChevronRight className="step-arrow" size={14} />}
+                  <span>{item.index}</span>
+                  {item.title}
                 </button>
               ))}
             </div>
+
+            <div className="opbar-steps" role="tablist" aria-label="Demo steps">
+              {demoSteps.map((step) => (
+                <button
+                  key={step.number}
+                  className={`step-chip ${activeStep === step.number ? 'active' : ''} ${activeStep > step.number ? 'done' : ''}`}
+                  onClick={() => selectStep(step.number)}
+                  aria-current={activeStep === step.number ? 'step' : undefined}
+                  title={step.label}
+                >
+                  <span className="step-dot">
+                    {activeStep > step.number ? <Check size={12} strokeWidth={3} /> : step.number}
+                  </span>
+                  <span className="step-chip-label">{step.short}</span>
+                </button>
+              ))}
+            </div>
+
             <button
               className="next-step"
               onClick={() => selectStep(activeStep === 6 ? 1 : activeStep + 1)}
             >
-              {activeStep === 6 ? 'Restart demo' : `Next · ${demoSteps[activeStep].short}`}
+              {activeStep === 6 ? 'Restart' : 'Next'}
               <ChevronRight size={15} />
             </button>
           </section>
-
-          <div className="status-ribbon">
-            <Sparkles size={15} />
-            <span>NOW DEMONSTRATING</span>
-            <strong>{currentStep.label}</strong>
-            <div className="ribbon-progress"><span style={{ width: `${activeStep * (100 / 6)}%` }} /></div>
-          </div>
 
           <section className="workspace-grid">
             <BoardPanel lesson={lesson} highlighted={activeStep === 1} />
