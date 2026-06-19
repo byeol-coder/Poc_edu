@@ -6,6 +6,7 @@ on:
       - main
       - codex/recorded-lecture-accessibility
       - feat/dotpad-hardware-output
+      - enhance/partner-ready-edu-poc
   workflow_dispatch:
 
 permissions:
