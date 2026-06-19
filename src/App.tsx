@@ -381,24 +381,26 @@ function App() {
             </button>
           </section>
 
-          <section className="workspace-grid">
-            <BoardPanel lesson={lesson} highlighted={activeStep === 1} />
-            <PipelinePanel lesson={lesson} activeStep={activeStep} highlighted={activeStep === 2} />
-            <OutputsPanel
-              lesson={lesson}
-              activeStep={activeStep}
-              isPlaying={isPlaying}
-              onTogglePlaying={toggleAudio}
-              selectedAnswer={selectedAnswer}
-              onSelectAnswer={selectQuizAnswer}
-              activeFunction={activeFunction}
-              onFunction={selectFunction}
-              dotPad={dotPad}
-              onSendScene={sendLiveScene}
-            />
-          </section>
-
-          <LibraryPanel lesson={lesson} highlighted={activeStep === 6} saved={activeStep === 6} />
+          <PipelineStrip activeStep={activeStep} lesson={lesson} />
+          <div className="workspace">
+            <aside className="source-pane">
+              <BoardPanel lesson={lesson} />
+            </aside>
+            <div className="focal-scroll">
+              <FocalCanvas
+                step={activeStep}
+                lesson={lesson}
+                isPlaying={isPlaying}
+                onTogglePlaying={toggleAudio}
+                selectedAnswer={selectedAnswer}
+                onSelectAnswer={selectQuizAnswer}
+                activeFunction={activeFunction}
+                onFunction={selectFunction}
+                dotPad={dotPad}
+                onSendScene={sendLiveScene}
+              />
+            </div>
+          </div>
         </>
       ) : (
         <RecordedLecture
@@ -501,9 +503,9 @@ function PanelTitle({
   )
 }
 
-function BoardPanel({ lesson, highlighted }: { lesson: Lesson; highlighted: boolean }) {
+function BoardPanel({ lesson }: { lesson: Lesson }) {
   return (
-    <section className={`panel board-panel ${highlighted ? 'focus-panel' : ''}`}>
+    <section className="panel board-panel">
       <PanelTitle
         number="01"
         eyebrow="SOURCE CLASSROOM"
@@ -697,98 +699,43 @@ function WaterVisual() {
   )
 }
 
-function PipelinePanel({
-  lesson,
-  activeStep,
-  highlighted,
-}: {
-  lesson: Lesson
-  activeStep: number
-  highlighted: boolean
-}) {
+function PipelineStrip({ activeStep, lesson }: { activeStep: number; lesson: Lesson }) {
   const progressByStep = activeStep === 1 ? 0 : activeStep === 2 ? 3 : activeStep === 3 ? 4 : 5
+  const isRunning = activeStep > 1
 
   return (
-    <section className={`panel pipeline-panel ${highlighted ? 'focus-panel' : ''}`}>
-      <PanelTitle
-        number="02"
-        eyebrow="ACCESSIBILITY ENGINE"
-        title="Dot Lens AI Pipeline"
-        icon={<Sparkles size={18} />}
-      />
-      <div className="ai-status">
-        <div className="ai-orb">
-          <ScanLine size={22} />
-          <span />
-        </div>
-        <div>
-          <small>DOT LENS MODEL</small>
-          <strong>{activeStep === 1 ? 'Awaiting source' : 'Multimodal analysis active'}</strong>
-        </div>
-        <span className={activeStep > 1 ? 'model-state active' : 'model-state'}>
-          {activeStep > 1 ? 'RUNNING' : 'READY'}
-        </span>
-      </div>
-
-      <div className="pipeline-flow">
-        {pipeline.map(({ label, detail, Icon }, index) => {
+    <div className="pipeline-strip" aria-label="AI pipeline status">
+      <span className={`pstrip-engine ${isRunning ? 'running' : ''}`}>
+        <ScanLine size={12} />
+        {isRunning ? 'RUNNING' : 'READY'}
+      </span>
+      <div className="pstrip-steps">
+        {pipeline.map(({ label, Icon }, index) => {
           const isComplete = index < progressByStep
-          const isCurrent =
-            (activeStep === 2 && index === Math.min(progressByStep, 2)) ||
-            (activeStep === 3 && index === 3) ||
-            (activeStep === 4 && index === 4)
+          const isCurrent = index === progressByStep && isRunning
           return (
-            <div key={label} className={`pipeline-row ${isComplete ? 'complete' : ''} ${isCurrent ? 'current' : ''}`}>
-              <div className="pipeline-node">
-                {isComplete ? <Check size={15} strokeWidth={3} /> : <Icon size={16} />}
+            <div key={label} className={`pstrip-step ${isComplete ? 'done' : ''} ${isCurrent ? 'current' : ''}`}>
+              {index > 0 && <div className="pstrip-connector" />}
+              <div className="pstrip-node">
+                {isComplete ? <Check size={10} strokeWidth={3.5} /> : <Icon size={11} />}
               </div>
-              <div className="pipeline-copy">
-                <strong>{label}</strong>
-                <span>{detail}</span>
-              </div>
-              <div className="pipeline-result">
-                {index === 0 && isComplete && `${lesson.detected.objects.length} objects`}
-                {index === 1 && isComplete && `${lesson.detected.textBlocks} blocks`}
-                {index === 2 && isComplete && '1 quiz'}
-                {index === 3 && isComplete && '2,400 pins'}
-                {index === 4 && isComplete && 'PT-BR'}
-                {!isComplete && <span>—</span>}
-              </div>
-              {index < pipeline.length - 1 && <div className="flow-line"><span /></div>}
+              <span className="pstrip-label">{label}</span>
             </div>
           )
         })}
       </div>
-
-      <div className="recognition-card">
-        <div className="recognition-head">
-          <span><ScanLine size={14} /> Recognition output</span>
-          <strong>{activeStep > 1 ? lesson.detected.confidence : '—'}</strong>
-        </div>
-        <div className="detected-tags">
-          {activeStep > 1 ? lesson.detected.objects.map((object) => (
-            <span key={object}>{object}</span>
-          )) : <span className="placeholder-tag">Waiting for Step 2</span>}
-        </div>
-        <div className="signal-bars">
-          {[72, 91, 84, 96, 77, 89, 94, 86, 98, 81, 93, 88].map((height, index) => (
-            <i key={index} style={{ height: activeStep > 1 ? `${height}%` : '12%' }} />
-          ))}
-        </div>
-      </div>
-
-      <div className="privacy-note">
-        <Eye size={13} />
-        <span>On-device processing</span>
-        <strong>No student data retained</strong>
-      </div>
-    </section>
+      {isRunning && (
+        <span className="pstrip-result">
+          {lesson.detected.confidence} · {lesson.detected.objects.length} obj
+        </span>
+      )}
+    </div>
   )
 }
 
-type OutputProps = {
+type FocalProps = {
+  step: number
   lesson: Lesson
-  activeStep: number
   isPlaying: boolean
   onTogglePlaying: () => void
   selectedAnswer: number | null
@@ -799,122 +746,256 @@ type OutputProps = {
   onSendScene: () => void
 }
 
-function OutputsPanel(props: OutputProps) {
-  const blindFocus = props.activeStep === 3
-  const deafFocus = props.activeStep === 4
-  const quizFocus = props.activeStep === 5
+function FocalCanvas(props: FocalProps) {
+  const [outputTab, setOutputTab] = useState<'blind' | 'deaf'>('blind')
+
+  useEffect(() => {
+    if (props.step === 3) setOutputTab('blind')
+    if (props.step === 4) setOutputTab('deaf')
+  }, [props.step])
+
+  if (props.step === 1) return <SourceReadyCanvas lesson={props.lesson} />
+  if (props.step === 2) return <PipelineDetailCanvas lesson={props.lesson} />
+  if (props.step === 6) return <LibraryPanel lesson={props.lesson} highlighted={false} saved />
 
   return (
-    <section className="panel outputs-panel">
-      <PanelTitle
-        number="03"
-        eyebrow="STUDENT EXPERIENCE"
-        title="Accessible Outputs"
-        icon={<Sparkles size={18} />}
-      />
-      <div className="output-stack">
-        <section className={`student-view blind-view ${blindFocus ? 'focus-card' : ''}`}>
-          <div className="student-head">
-            <div className="student-icon blind"><CircleDot size={17} /></div>
-            <div>
-              <span>BLIND / LOW VISION</span>
-              <strong>DotPad Student View</strong>
-            </div>
-            <div className={props.dotPad.status === 'connected' ? 'connected' : 'connected standby'}>
-              <i /> {props.dotPad.status === 'connected' ? 'DOTPAD LIVE' : 'PREVIEW'}
-            </div>
-          </div>
-          <div className="blind-content">
-            <div className="dotpad-stage">
-              <DotPadPreview lesson={props.lesson} ready={props.activeStep >= 3} />
-              <div className="dotpad-stage-actions">
-                <DotPadConnect dotPad={props.dotPad} />
-                <button
-                  type="button"
-                  className="dotpad-send-btn"
-                  disabled={props.activeStep < 3 || props.dotPad.status !== 'connected'}
-                  onClick={props.onSendScene}
-                >
-                  <CircleDot size={13} />
-                  {props.dotPad.status === 'connected' ? 'Send scene to DotPad' : 'Connect a DotPad to send'}
-                </button>
-              </div>
-            </div>
-            <div className="audio-column">
-              <div className="audio-card">
-                <div className="audio-head">
-                  <span><Headphones size={14} /> Audio description</span>
-                  <small>EN · 0:18</small>
-                </div>
-                <p>{props.activeStep >= 3 ? props.lesson.voiceDescription : 'Description will be generated at Step 3.'}</p>
-                <div className="audio-player">
-                  <button onClick={props.onTogglePlaying} disabled={props.activeStep < 3} aria-label="Play audio description">
-                    {props.isPlaying ? <Pause size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
-                  </button>
-                  <div className="audio-wave">
-                    {[35, 62, 44, 76, 52, 88, 67, 48, 79, 58, 92, 63, 42, 72, 54].map((height, index) => (
-                      <i key={index} style={{ height: props.activeStep >= 3 ? `${height}%` : '15%' }} />
-                    ))}
-                  </div>
-                  <Volume2 size={13} />
-                </div>
-              </div>
-              <div className="function-keys">
-                {['Explore', 'Labels', 'Repeat', 'Quiz'].map((label, index) => (
-                  <button
-                    key={label}
-                    className={props.activeFunction === index ? 'active' : ''}
-                    onClick={() => props.onFunction(index)}
-                  >
-                    <span>F{index + 1}</span>{label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className={`student-view deaf-view ${deafFocus || quizFocus ? 'focus-card' : ''}`}>
-          <div className="student-head">
-            <div className="student-icon deaf"><Captions size={17} /></div>
-            <div>
-              <span>DEAF / HARD OF HEARING</span>
-              <strong>Visual Learning View</strong>
-            </div>
-            <div className={props.activeStep >= 4 ? 'connected captions-on' : 'connected'}><i /> {props.activeStep >= 4 ? 'CAPTIONS ON' : 'STANDBY'}</div>
-          </div>
-          <div className="deaf-content">
-            <div className={`caption-card ${deafFocus ? 'inner-focus' : ''}`}>
-              <div className="caption-meta">
-                <span><AudioLines size={13} /> LIVE TRANSCRIPT</span>
-                <small>00:42</small>
-              </div>
-              <p>
-                {props.activeStep >= 4
-                  ? <><span>Prof. Marina</span> {props.lesson.caption}</>
-                  : 'Live classroom captions will appear at Step 4.'}
-              </p>
-              <div className="caption-line"><i style={{ width: props.activeStep >= 4 ? '74%' : '8%' }} /></div>
-            </div>
-            <div className="summary-card">
-              <div className="mini-card-title"><FileText size={13} /> Key summary</div>
-              <ul>
-                {(props.activeStep >= 4 ? props.lesson.summary : ['Summary queued', 'Key terms queued', 'Concept links queued']).map((item, index) => (
-                  <li key={item}><span>{index + 1}</span>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <QuizCard
-              lesson={props.lesson}
-              enabled={props.activeStep >= 5}
-              highlighted={quizFocus}
-              selected={props.selectedAnswer}
-              onSelect={props.onSelectAnswer}
-            />
-          </div>
-        </section>
+    <div className="focal-output">
+      <div className="output-tabs" role="tablist" aria-label="Accessibility output mode">
+        <button
+          role="tab"
+          aria-selected={outputTab === 'blind'}
+          className={outputTab === 'blind' ? 'active' : ''}
+          onClick={() => setOutputTab('blind')}
+        >
+          <CircleDot size={14} />
+          DotPad · Blind / Low Vision
+          <span className={props.dotPad.status === 'connected' ? 'tab-badge live' : 'tab-badge'}>
+            {props.dotPad.status === 'connected' ? 'LIVE' : 'PREVIEW'}
+          </span>
+        </button>
+        <button
+          role="tab"
+          aria-selected={outputTab === 'deaf'}
+          className={outputTab === 'deaf' ? 'active' : ''}
+          onClick={() => setOutputTab('deaf')}
+        >
+          <Captions size={14} />
+          Captions · Deaf / HoH
+          <span className={props.step >= 4 ? 'tab-badge live' : 'tab-badge'}>
+            {props.step >= 4 ? 'ON' : 'STANDBY'}
+          </span>
+        </button>
       </div>
-    </section>
+      {outputTab === 'blind' ? (
+        <BlindCanvas
+          lesson={props.lesson}
+          activeStep={props.step}
+          isPlaying={props.isPlaying}
+          onTogglePlaying={props.onTogglePlaying}
+          activeFunction={props.activeFunction}
+          onFunction={props.onFunction}
+          dotPad={props.dotPad}
+          onSendScene={props.onSendScene}
+        />
+      ) : (
+        <DeafCanvas
+          lesson={props.lesson}
+          activeStep={props.step}
+          selectedAnswer={props.selectedAnswer}
+          onSelectAnswer={props.onSelectAnswer}
+        />
+      )}
+    </div>
+  )
+}
+
+function SourceReadyCanvas({ lesson }: { lesson: Lesson }) {
+  return (
+    <div className="focal-ready">
+      <div className="focal-ready-icon"><Sparkles size={28} /></div>
+      <h3>Board source captured</h3>
+      <p className="focal-ready-desc">{lesson.boardPrompt}</p>
+      <p className="focal-ready-hint">Click <strong>Next →</strong> to run Dot Lens AI on this board.</p>
+      <div className="focal-ready-features">
+        {pipeline.map(({ label, Icon }) => (
+          <div key={label} className="focal-feature">
+            <Icon size={14} />
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PipelineDetailCanvas({ lesson }: { lesson: Lesson }) {
+  return (
+    <div className="focal-pipeline">
+      <div className="ai-status">
+        <div className="ai-orb">
+          <ScanLine size={22} />
+          <span />
+        </div>
+        <div>
+          <small>DOT LENS MODEL</small>
+          <strong>Multimodal analysis active</strong>
+        </div>
+        <span className="model-state active">RUNNING</span>
+      </div>
+      <div className="pipeline-flow">
+        {pipeline.map(({ label, detail, Icon }, index) => {
+          const isComplete = index < 3
+          const isCurrent = index === 2
+          return (
+            <div key={label} className={`pipeline-row ${isComplete ? 'complete' : ''} ${isCurrent ? 'current' : ''}`}>
+              <div className="pipeline-node">
+                {isComplete ? <Check size={15} strokeWidth={3} /> : <Icon size={16} />}
+              </div>
+              <div className="pipeline-copy">
+                <strong>{label}</strong>
+                <span>{detail}</span>
+              </div>
+              <div className="pipeline-result">
+                {index === 0 && `${lesson.detected.objects.length} objects`}
+                {index === 1 && `${lesson.detected.textBlocks} blocks`}
+                {index === 2 && '1 quiz'}
+                {index > 2 && <span>—</span>}
+              </div>
+              {index < pipeline.length - 1 && <div className="flow-line"><span /></div>}
+            </div>
+          )
+        })}
+      </div>
+      <div className="recognition-card">
+        <div className="recognition-head">
+          <span><ScanLine size={14} /> Recognition output</span>
+          <strong>{lesson.detected.confidence}</strong>
+        </div>
+        <div className="detected-tags">
+          {lesson.detected.objects.map((object) => (
+            <span key={object}>{object}</span>
+          ))}
+        </div>
+        <div className="signal-bars">
+          {[72, 91, 84, 96, 77, 89, 94, 86, 98, 81, 93, 88].map((height, index) => (
+            <i key={index} style={{ height: `${height}%` }} />
+          ))}
+        </div>
+      </div>
+      <div className="privacy-note">
+        <Eye size={13} />
+        <span>On-device processing</span>
+        <strong>No student data retained</strong>
+      </div>
+    </div>
+  )
+}
+
+type BlindCanvasProps = {
+  lesson: Lesson
+  activeStep: number
+  isPlaying: boolean
+  onTogglePlaying: () => void
+  activeFunction: number
+  onFunction: (index: number) => void
+  dotPad: DotPadController
+  onSendScene: () => void
+}
+
+function BlindCanvas(props: BlindCanvasProps) {
+  return (
+    <div className="blind-canvas">
+      <div className="dotpad-stage">
+        <DotPadPreview lesson={props.lesson} ready />
+        <div className="dotpad-stage-actions">
+          <DotPadConnect dotPad={props.dotPad} />
+          <button
+            type="button"
+            className="dotpad-send-btn"
+            disabled={props.dotPad.status !== 'connected'}
+            onClick={props.onSendScene}
+          >
+            <CircleDot size={13} />
+            {props.dotPad.status === 'connected' ? 'Send scene to DotPad' : 'Connect a DotPad to send'}
+          </button>
+        </div>
+      </div>
+      <div className="audio-column">
+        <div className="audio-card">
+          <div className="audio-head">
+            <span><Headphones size={14} /> Audio description</span>
+            <small>EN · 0:18</small>
+          </div>
+          <p>{props.lesson.voiceDescription}</p>
+          <div className="audio-player">
+            <button onClick={props.onTogglePlaying} aria-label="Play audio description">
+              {props.isPlaying ? <Pause size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
+            </button>
+            <div className="audio-wave">
+              {[35, 62, 44, 76, 52, 88, 67, 48, 79, 58, 92, 63, 42, 72, 54].map((height, index) => (
+                <i key={index} style={{ height: `${height}%` }} />
+              ))}
+            </div>
+            <Volume2 size={13} />
+          </div>
+        </div>
+        <div className="function-keys">
+          {['Explore', 'Labels', 'Repeat', 'Quiz'].map((label, index) => (
+            <button
+              key={label}
+              className={props.activeFunction === index ? 'active' : ''}
+              onClick={() => props.onFunction(index)}
+            >
+              <span>F{index + 1}</span>{label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DeafCanvas({
+  lesson,
+  activeStep,
+  selectedAnswer,
+  onSelectAnswer,
+}: {
+  lesson: Lesson
+  activeStep: number
+  selectedAnswer: number | null
+  onSelectAnswer: (index: number) => void
+}) {
+  return (
+    <div className="deaf-canvas">
+      <div className="caption-card">
+        <div className="caption-meta">
+          <span><AudioLines size={13} /> LIVE TRANSCRIPT</span>
+          <small>00:42</small>
+        </div>
+        <p>
+          <span>Prof. Marina</span> {lesson.caption}
+        </p>
+        <div className="caption-line">
+          <i style={{ width: activeStep >= 4 ? '74%' : '8%' }} />
+        </div>
+      </div>
+      <div className="summary-card">
+        <div className="mini-card-title"><FileText size={13} /> Key summary</div>
+        <ul>
+          {lesson.summary.map((item, index) => (
+            <li key={item}><span>{index + 1}</span>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <QuizCard
+        lesson={lesson}
+        enabled={activeStep >= 5}
+        highlighted={activeStep === 5}
+        selected={selectedAnswer}
+        onSelect={onSelectAnswer}
+      />
+    </div>
   )
 }
 

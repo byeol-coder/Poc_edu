@@ -3936,3 +3936,281 @@ svg {
   padding: 9px 15px;
   border-radius: 10px;
 }
+
+/* ── Phase 2: Pipeline strip ─────────────────────────────── */
+.pipeline-strip {
+  position: sticky;
+  top: 120px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 38px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line-soft);
+  background: rgba(247, 249, 251, .96);
+  backdrop-filter: blur(12px);
+}
+
+.pstrip-engine {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: #edf1f3;
+  color: var(--ink-muted);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  white-space: nowrap;
+  flex: none;
+}
+.pstrip-engine.running {
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
+  color: var(--accent);
+}
+.pstrip-engine.running svg { animation: dotpad-spin .9s linear infinite; }
+
+.pstrip-steps {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.pstrip-step {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pstrip-connector {
+  height: 1px;
+  flex: 1;
+  background: var(--line-soft);
+  margin-right: 5px;
+  transition: background .3s ease;
+}
+.pstrip-step.done .pstrip-connector { background: var(--accent); }
+
+.pstrip-node {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  color: var(--ink-faint);
+  flex: none;
+  transition: border-color .25s ease, background .25s ease;
+}
+.pstrip-step.done .pstrip-node {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.pstrip-step.current .pstrip-node {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pstrip-label {
+  font-size: 10px;
+  font-weight: 650;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color .2s ease;
+}
+.pstrip-step.done .pstrip-label { color: var(--ink-muted); }
+.pstrip-step.current .pstrip-label { color: var(--accent); font-weight: 750; }
+
+.pstrip-result {
+  font-size: 10px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  flex: none;
+}
+
+/* ── Phase 2: 2-column workspace ─────────────────────────── */
+.workspace {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 230px);
+  margin-top: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface-solid);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.source-pane {
+  border-right: 1px solid var(--line-soft);
+  overflow-y: auto;
+}
+.source-pane .panel {
+  min-height: auto;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.source-pane .smartboard-frame {
+  min-height: 340px;
+}
+
+.focal-scroll {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Focal: step 1 ready state ───────────────────────────── */
+.focal-ready {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 56px 40px;
+  text-align: center;
+}
+.focal-ready-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.focal-ready h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  letter-spacing: -.02em;
+  font-family: var(--font-display);
+}
+.focal-ready-desc {
+  max-width: 400px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.focal-ready-hint {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin: 0 0 32px;
+}
+.focal-ready-features {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.focal-feature {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+.focal-feature svg { color: var(--accent); }
+
+/* ── Focal: step 2 pipeline detail ──────────────────────── */
+.focal-pipeline {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Focal: output tabs (steps 3-5) ─────────────────────── */
+.focal-output {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.output-tabs {
+  display: flex;
+  align-items: stretch;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-subtle);
+  gap: 0;
+  flex: none;
+}
+.output-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+  margin-bottom: -1px;
+}
+.output-tabs button:hover { color: var(--ink); }
+.output-tabs button.active {
+  color: var(--ink-strong);
+  border-bottom-color: var(--accent);
+  background: var(--surface-solid);
+}
+.output-tabs button.active svg { color: var(--accent); }
+.tab-badge {
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  background: #edf1f3;
+  color: var(--ink-muted);
+}
+.tab-badge.live {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+/* ── Blind canvas ────────────────────────────────────────── */
+.blind-canvas {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 20px;
+  padding: 20px 24px;
+  align-items: start;
+}
+
+/* ── Deaf canvas ─────────────────────────────────────────── */
+.deaf-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 24px;
+}
+
+/* ── Library in focal canvas ────────────────────────────── */
+.focal-scroll .library-section {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
