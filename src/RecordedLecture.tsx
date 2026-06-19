@@ -24,6 +24,9 @@ import {
 } from 'lucide-react'
 import { lectureMarkers, lecturePacks, videoAnalysisSteps } from './recordedData'
 import type { LearningEventType } from './lib/tracking'
+import DotPadConnect from './components/DotPadConnect'
+import type { DotPadController } from './lib/dotpad/useDotPad'
+import { buildRecordedMatrix, countRaised, matrixToDots } from './lib/dotpad/sceneMatrix'
 
 type LectureTab = 'blind' | 'deaf' | 'quiz'
 
@@ -34,11 +37,12 @@ type Props = {
     demoStep: number,
     payload?: Record<string, unknown>,
   ) => void
+  dotPad: DotPadController
 }
 
 const totalSeconds = 258
 
-export default function RecordedLecture({ sessionId, onTrack }: Props) {
+export default function RecordedLecture({ sessionId, onTrack, dotPad }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [phase, setPhase] = useState<7 | 8>(7)
   const [activeMarker, setActiveMarker] = useState(2)
@@ -101,6 +105,8 @@ export default function RecordedLecture({ sessionId, onTrack }: Props) {
   }
 
   const sendScene = () => {
+    const sceneMatrix = buildRecordedMatrix(activeMarker)
+    const delivered = dotPad.sendMatrix(sceneMatrix)
     setSentToDotPad(true)
     onTrack('lecture_scene_generated', 7, {
       lecture_id: 'plant-structure-recorded',
@@ -109,6 +115,10 @@ export default function RecordedLecture({ sessionId, onTrack }: Props) {
       video_seconds: marker.seconds,
       tactile_title: marker.tactileTitle,
       matrix: { columns: 60, rows: 40, pins: 2400 },
+      raised_pins: countRaised(sceneMatrix),
+      delivered_to_hardware: delivered,
+      device_name: delivered ? dotPad.deviceName : null,
+      transport: delivered ? dotPad.transport : 'preview_only',
       audio_description: marker.description,
     })
   }
@@ -207,6 +217,7 @@ export default function RecordedLecture({ sessionId, onTrack }: Props) {
           markerIndex={activeMarker}
           audioReplay={audioReplay}
           sentToDotPad={sentToDotPad}
+          dotPad={dotPad}
           quizAnswer={quizAnswer}
           onTab={selectTab}
           onReplay={replayAudio}
@@ -382,6 +393,7 @@ function LectureOutputs({
   markerIndex,
   audioReplay,
   sentToDotPad,
+  dotPad,
   quizAnswer,
   onTab,
   onReplay,
@@ -395,6 +407,7 @@ function LectureOutputs({
   markerIndex: number
   audioReplay: boolean
   sentToDotPad: boolean
+  dotPad: DotPadController
   quizAnswer: number | null
   onTab: (tab: LectureTab) => void
   onReplay: () => void
@@ -457,11 +470,18 @@ function LectureOutputs({
                 <li><i>3</i>Follow the root branches outward.</li>
               </ol>
             </div>
+            <DotPadConnect dotPad={dotPad} />
             <div className="lecture-action-buttons">
               <button onClick={onReplay}><RotateCcw size={12} /> Replay audio description</button>
               <button className={sentToDotPad ? 'success' : 'primary'} onClick={onSend}>
                 {sentToDotPad ? <Check size={12} /> : <Send size={12} />}
-                {sentToDotPad ? 'Scene sent to DotPad' : 'Send scene to DotPad'}
+                {sentToDotPad
+                  ? dotPad.status === 'connected'
+                    ? 'Scene sent to DotPad'
+                    : 'Scene rendered (preview)'
+                  : dotPad.status === 'connected'
+                    ? 'Send scene to DotPad'
+                    : 'Render scene (connect to send)'}
               </button>
               <button onClick={onNext}>Next tactile scene <ChevronRight size={12} /></button>
             </div>
@@ -621,26 +641,10 @@ function RecordedTitle({
 }
 
 function RecordedDotPad({ markerIndex, sent }: { markerIndex: number; sent: boolean }) {
-  const dots = useMemo(() => {
-    const result: { x: number; y: number; raised: boolean }[] = []
-    for (let y = 0; y < 40; y += 1) {
-      for (let x = 0; x < 60; x += 1) {
-        const stem = Math.abs(x - 30) < 1 && y > 6 && y < 27
-        const leafLeft = ((x - 23) / 8) ** 2 + ((y - 14) / 4) ** 2 < 1
-        const leafRight = ((x - 37) / 8) ** 2 + ((y - 11) / 4) ** 2 < 1
-        const soil = y === 27 && x > 4 && x < 56
-        const rootMain = y > 26 && Math.abs(x - 30) < 1
-        const rootLeft = y > 27 && Math.abs(x - (30 - (y - 27) * 1.3)) < 1
-        const rootRight = y > 27 && Math.abs(x - (30 + (y - 27) * 1.35)) < 1
-        const flower = markerIndex < 2 && Math.hypot(x - 30, y - 5) < 4
-        const rootFocus = markerIndex >= 2
-          ? (rootMain || rootLeft || rootRight || soil)
-          : (stem || leafLeft || leafRight || flower || soil || rootMain || rootLeft || rootRight)
-        result.push({ x, y, raised: rootFocus })
-      }
-    }
-    return result
-  }, [markerIndex])
+  const dots = useMemo(
+    () => matrixToDots(buildRecordedMatrix(markerIndex)),
+    [markerIndex],
+  )
 
   return (
     <div className={`recorded-dotpad ${sent ? 'sent' : ''}`}>

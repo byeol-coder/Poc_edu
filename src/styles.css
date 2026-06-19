@@ -3676,3 +3676,141 @@ svg {
   .step-button { justify-content: center; }
   .step-arrow { right: -7px; }
 }
+
+/* ── DotPad hardware connection ─────────────────────────────────────── */
+.connected.standby {
+  color: var(--ink-faint);
+}
+.connected.standby i {
+  background: var(--ink-faint);
+}
+
+.dotpad-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dotpad-stage-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dotpad-connect {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.dotpad-connect-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dotpad-connect-btn,
+.dotpad-send-btn,
+.dotpad-disconnect {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-solid);
+  color: var(--ink-strong);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  min-height: var(--control-sm);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .1s ease;
+}
+
+.dotpad-connect-btn:hover,
+.dotpad-send-btn:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dotpad-connect-btn:active,
+.dotpad-send-btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.dotpad-send-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  justify-content: center;
+  width: 100%;
+}
+.dotpad-send-btn:not(:disabled):hover {
+  filter: brightness(1.05);
+  color: #fff;
+}
+.dotpad-send-btn:disabled {
+  background: var(--surface-subtle);
+  border-color: var(--line);
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.dotpad-connect.connected {
+  color: #3c7a63;
+  font-weight: 750;
+}
+.dotpad-connect .dotpad-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.dotpad-connect-name {
+  font-weight: 800;
+  color: var(--ink-strong);
+}
+.dotpad-connect-tag {
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+.dotpad-disconnect {
+  margin-left: auto;
+  padding: 5px 9px;
+  min-height: 0;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.dotpad-connect.unsupported {
+  font-size: 10px;
+  color: var(--ink-faint);
+  line-height: 1.35;
+}
+
+.dotpad-connect-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #c0492f;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.dotpad-spin {
+  animation: dotpad-spin 1s linear infinite;
+}
+@keyframes dotpad-spin {
+  to { transform: rotate(360deg); }
+}

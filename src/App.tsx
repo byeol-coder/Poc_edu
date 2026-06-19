@@ -34,6 +34,9 @@ import {
 import { demoSteps, lessons, type Lesson, type LessonId } from './data'
 import { useSupabaseTracking, type SyncState } from './hooks/useSupabaseTracking'
 import RecordedLecture from './RecordedLecture'
+import DotPadConnect from './components/DotPadConnect'
+import { useDotPad, type DotPadController } from './lib/dotpad/useDotPad'
+import { buildLiveMatrix, countRaised, matrixToDots } from './lib/dotpad/sceneMatrix'
 
 type ExperienceMode = 'live' | 'recorded'
 
@@ -56,6 +59,7 @@ function App() {
   const [recordedSessionId] = useState(() => crypto.randomUUID())
   const quizStartedAt = useRef<number | null>(null)
   const initializedSessions = useRef(new Set<string>())
+  const dotPad = useDotPad()
   const {
     isConfigured,
     syncState,
@@ -256,6 +260,25 @@ function App() {
     })
   }
 
+  const sendLiveScene = () => {
+    const matrix = buildLiveMatrix(lesson.id, true)
+    const delivered = dotPad.sendMatrix(matrix)
+    void track({
+      sessionId,
+      lessonId: lesson.id,
+      eventType: 'tactile_generated',
+      demoStep: Math.max(activeStep, 3),
+      payload: {
+        locale: 'en',
+        matrix: { columns: 60, rows: 40, pins: 2400 },
+        raised_pins: countRaised(matrix),
+        delivered_to_hardware: delivered,
+        device_name: delivered ? dotPad.deviceName : null,
+        transport: delivered ? dotPad.transport : 'preview_only',
+      },
+    })
+  }
+
   const selectQuizAnswer = (index: number) => {
     setSelectedAnswer(index)
     void track({
@@ -421,6 +444,8 @@ function App() {
               onSelectAnswer={selectQuizAnswer}
               activeFunction={activeFunction}
               onFunction={selectFunction}
+              dotPad={dotPad}
+              onSendScene={sendLiveScene}
             />
           </section>
 
@@ -430,6 +455,7 @@ function App() {
         <RecordedLecture
           sessionId={recordedSessionId}
           onTrack={trackRecordedEvent}
+          dotPad={dotPad}
         />
       )}
 
@@ -820,6 +846,8 @@ type OutputProps = {
   onSelectAnswer: (index: number) => void
   activeFunction: number
   onFunction: (index: number) => void
+  dotPad: DotPadController
+  onSendScene: () => void
 }
 
 function OutputsPanel(props: OutputProps) {
@@ -843,10 +871,26 @@ function OutputsPanel(props: OutputProps) {
               <span>BLIND / LOW VISION</span>
               <strong>DotPad Student View</strong>
             </div>
-            <div className="connected"><i /> CONNECTED</div>
+            <div className={props.dotPad.status === 'connected' ? 'connected' : 'connected standby'}>
+              <i /> {props.dotPad.status === 'connected' ? 'DOTPAD LIVE' : 'PREVIEW'}
+            </div>
           </div>
           <div className="blind-content">
-            <DotPadPreview lesson={props.lesson} ready={props.activeStep >= 3} />
+            <div className="dotpad-stage">
+              <DotPadPreview lesson={props.lesson} ready={props.activeStep >= 3} />
+              <div className="dotpad-stage-actions">
+                <DotPadConnect dotPad={props.dotPad} />
+                <button
+                  type="button"
+                  className="dotpad-send-btn"
+                  disabled={props.activeStep < 3 || props.dotPad.status !== 'connected'}
+                  onClick={props.onSendScene}
+                >
+                  <CircleDot size={13} />
+                  {props.dotPad.status === 'connected' ? 'Send scene to DotPad' : 'Connect a DotPad to send'}
+                </button>
+              </div>
+            </div>
             <div className="audio-column">
               <div className="audio-card">
                 <div className="audio-head">
@@ -926,49 +970,10 @@ function OutputsPanel(props: OutputProps) {
 }
 
 function DotPadPreview({ lesson, ready }: { lesson: Lesson; ready: boolean }) {
-  const dots = useMemo(() => {
-    const result: { x: number; y: number; raised: boolean }[] = []
-    for (let y = 0; y < 40; y += 1) {
-      for (let x = 0; x < 60; x += 1) {
-        let raised = false
-        if (ready) {
-          if (lesson.id === 'plant') {
-            const stem = Math.abs(x - 30) < 1 && y > 9 && y < 30
-            const flower = Math.hypot(x - 30, y - 8) < 5 && Math.hypot(x - 30, y - 8) > 2.2
-            const leafLeft = ((x - 23) / 8) ** 2 + ((y - 17) / 4) ** 2 < 1
-            const leafRight = ((x - 37) / 8) ** 2 + ((y - 14) / 4) ** 2 < 1
-            const soil = y === 30 && x > 5 && x < 55
-            const roots = y > 29 && (
-              Math.abs(x - (30 - (y - 29) * .7)) < 1 ||
-              Math.abs(x - (30 + (y - 29) * .75)) < 1 ||
-              Math.abs(x - 30) < 1
-            )
-            raised = stem || flower || leafLeft || leafRight || soil || roots
-          } else if (lesson.id === 'solar') {
-            const sun = Math.hypot(x - 10, y - 20) < 5
-            const orbit1 = Math.abs(((x - 10) / 15) ** 2 + ((y - 20) / 7) ** 2 - 1) < .16
-            const orbit2 = Math.abs(((x - 10) / 25) ** 2 + ((y - 20) / 12) ** 2 - 1) < .12
-            const orbit3 = Math.abs(((x - 10) / 37) ** 2 + ((y - 20) / 17) ** 2 - 1) < .1
-            const planet = Math.hypot(x - 35, y - 12) < 2.2
-            raised = sun || orbit1 || orbit2 || orbit3 || planet
-          } else {
-            const sea = y === 31 + Math.round(Math.sin(x / 4)) && x > 2 && x < 57
-            const mountain = (Math.abs(y - (31 - Math.abs(x - 43) * .7)) < 1 && x > 31 && x < 55)
-            const cloud = (
-              Math.hypot(x - 34, y - 10) < 4 ||
-              Math.hypot(x - 40, y - 9) < 5 ||
-              Math.hypot(x - 46, y - 11) < 4
-            )
-            const rain = x > 34 && x < 49 && y > 14 && y < 25 && (x + y) % 5 === 0
-            const vapor = x > 12 && x < 22 && y > 15 && y < 30 && (x - y) % 5 === 0
-            raised = sea || mountain || cloud || rain || vapor
-          }
-        }
-        result.push({ x, y, raised })
-      }
-    }
-    return result
-  }, [lesson.id, ready])
+  const dots = useMemo(
+    () => matrixToDots(buildLiveMatrix(lesson.id, ready)),
+    [lesson.id, ready],
+  )
 
   return (
     <div className="dotpad-shell">
