@@ -273,7 +273,7 @@ function RecordedPlayer({
       <div className="lecture-video-frame">
         <video
           ref={videoRef}
-          src="/inclusive-education-brazil.mp4"
+          src={`${import.meta.env.BASE_URL}inclusive-education-brazil.mp4`}
           preload="metadata"
           onEnded={() => undefined}
           aria-label="Inclusive Education Strategies in Brazil recorded lecture"
