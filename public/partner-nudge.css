@@ -1,0 +1,82 @@
+.brand-lockup::after {
+  content: "PoC Simulation";
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  margin-left: 4px;
+  padding: 5px 9px;
+  border: 1px solid #dfe5e8;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .78);
+  color: #2f765e;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mode-toggle::after {
+  content: "Integration-ready";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  margin-left: 6px;
+  padding: 7px 10px;
+  border: 1px solid #dfe5e8;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+  color: #697481;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  box-shadow: var(--shadow-xs);
+}
+
+.opbar { position: relative; }
+
+.opbar::after {
+  content: "Partner Flow · Content to AI to DotPad to Learning Check";
+  position: absolute;
+  right: 72px;
+  bottom: -28px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 5px 10px;
+  border: 1px solid rgba(223, 229, 232, .92);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  color: #7a8490;
+  font-size: 8px;
+  font-weight: 760;
+  box-shadow: 0 8px 18px rgba(30, 42, 55, .055);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.workspace-grid { margin-top: 12px; }
+
+.next-step::before {
+  content: "Demo flow";
+  margin-right: 3px;
+  color: rgba(255, 255, 255, .7);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.footer-note span:first-child::after {
+  content: " · Partner review ready";
+  color: #7b858f;
+  font-weight: 780;
+}
+
+@media (max-width: 1280px) {
+  .brand-lockup::after,
+  .mode-toggle::after,
+  .opbar::after,
+  .next-step::before { display: none; }
+  .workspace-grid { margin-top: 0; }
+}
