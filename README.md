@@ -38,6 +38,40 @@ Production check:
 npm run build
 ```
 
+## Connect a real DotPad (hardware output)
+
+The blind / low-vision view can push the on-screen 60 × 40 tactile scene to a
+physical DotPad over **Web Bluetooth** or **Web Serial (USB)** using the bundled
+`DotPadSDK 3.0.0`. The on-screen preview and the hardware output read from the
+exact same scene matrix ([`src/lib/dotpad/sceneMatrix.ts`](./src/lib/dotpad/sceneMatrix.ts)),
+so what a sighted reviewer sees is what the student feels.
+
+1. Use **Chrome** or **Edge** over `https://` (or `http://localhost`). Web
+   Bluetooth / Web Serial are not available in Safari/Firefox.
+2. In **Live Classroom** advance to *Step 3* (or open the **Recorded Lecture**
+   blind tab), then click **Connect DotPad (Bluetooth)** or **USB** and pick the
+   device in the browser chooser.
+3. Once the status reads **DOTPAD LIVE / CONNECTED**, press **Send scene to
+   DotPad**. The active scene is encoded and displayed on the device.
+4. Without a device connected the button stays in preview-only mode — nothing
+   breaks, it simply renders on screen.
+
+### How the encoding works
+
+- 60 × 40 pins = 30 × 10 cells of 2 × 4 dots = 300 bytes = 600 hex chars.
+- [`src/lib/dotpad/encode.ts`](./src/lib/dotpad/encode.ts) packs each cell in the
+  SDK's native **GraphicMode** bit order (`bit = column * 4 + row`), derived by
+  inverting the SDK's own `brailleToGraphic` transform, and the result is sent
+  with `DotPadSDK.displayGraphicData(hex, device, GraphicMode)`.
+- Tracking events now record `delivered_to_hardware`, `device_name`,
+  `transport`, and `raised_pins` so a demo can distinguish real output from a
+  preview.
+
+> The included `DotPadSDK-3_0_0.js` is the vendor SDK. Connection and key events
+> are wired through [`src/lib/dotpad/useDotPad.ts`](./src/lib/dotpad/useDotPad.ts).
+> The encoder is verified against the SDK transform; confirm dot orientation on
+> real hardware and flip the bit order in `encode.ts` if a unit's mapping differs.
+
 ## Connect the Supabase project
 
 The project URL is already configured as:
