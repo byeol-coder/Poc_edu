@@ -39,6 +39,25 @@ import { buildLiveMatrix, countRaised, matrixToDots } from './lib/dotpad/sceneMa
 
 type ExperienceMode = 'live' | 'recorded'
 
+const simCopy = {
+  en: {
+    modeLabel: 'Accessibility experience mode',
+    live: 'Live classroom',
+    recorded: 'Recorded lecture',
+    envNote: 'Prototype environment · mock AI recognition, real DotPad SDK output',
+    synced: (n: number) => `${n} events synced to Supabase`,
+    queued: (n: number) => `${n} events queued locally`,
+  },
+  ko: {
+    modeLabel: '접근성 경험 모드',
+    live: '실시간 수업',
+    recorded: '녹화 강의',
+    envNote: '프로토타입 환경 · AI 인식은 목업, DotPad SDK 출력은 실제 연동',
+    synced: (n: number) => `${n}개 이벤트 Supabase 동기화됨`,
+    queued: (n: number) => `${n}개 이벤트 로컬 대기 중`,
+  },
+} as const
+
 const pipeline = [
   { label: 'Image recognition', detail: 'Scene + objects', Icon: ImageIcon },
   { label: 'Text extraction', detail: 'Portuguese OCR', Icon: Type },
@@ -47,7 +66,7 @@ const pipeline = [
   { label: 'Caption generation', detail: 'Live PT-BR', Icon: Captions },
 ]
 
-function App() {
+export function Simulation({ lang = 'en' }: { lang?: 'en' | 'ko' }) {
   const [experienceMode, setExperienceMode] = useState<ExperienceMode>('live')
   const [lessonId, setLessonId] = useState<LessonId>('plant')
   const [activeStep, setActiveStep] = useState(1)
@@ -295,25 +314,19 @@ function App() {
     })
   }
 
-  return (
-    <main className="app-shell" style={{ '--accent': lesson.accent, '--accent-soft': lesson.accentSoft } as React.CSSProperties}>
-      <header className="topbar">
-        <div className="brand-lockup">
-          <DotMark />
-          <div>
-            <div className="brand-title">Dot Lens</div>
-            <div className="brand-subtitle">for UFIT Science Accessibility</div>
-          </div>
-        </div>
+  const t = simCopy[lang]
 
-        <div className="mode-toggle" role="tablist" aria-label="Accessibility experience mode">
+  return (
+    <div className="sim-shell" id="poc-simulation-app" style={{ '--accent': lesson.accent, '--accent-soft': lesson.accentSoft } as React.CSSProperties}>
+      <header className="sim-toolbar">
+        <div className="sim-toolbar-mode" role="tablist" aria-label={t.modeLabel}>
           <button
             className={experienceMode === 'live' ? 'active' : ''}
             onClick={() => changeExperienceMode('live')}
             role="tab"
             aria-selected={experienceMode === 'live'}
           >
-            <Radio size={14} /> Live Classroom
+            <Radio size={14} /> {t.live}
           </button>
           <button
             className={experienceMode === 'recorded' ? 'active' : ''}
@@ -321,11 +334,11 @@ function App() {
             role="tab"
             aria-selected={experienceMode === 'recorded'}
           >
-            <MonitorPlay size={14} /> Recorded Lecture
+            <MonitorPlay size={14} /> {t.recorded}
           </button>
         </div>
 
-        <div className="top-actions">
+        <div className="sim-toolbar-status">
           <SupabaseStatus
             configured={isConfigured}
             state={syncState}
@@ -408,14 +421,12 @@ function App() {
         />
       )}
 
-      <footer className="footer-note">
+      <footer className="sim-footnote">
         <span>
-          Prototype environment · Mock AI recognition and DotPad SDK output ·
-          {' '}{isConfigured ? `${syncedCount} events synced to Supabase` : `${pendingCount} events queued locally`}
+          {t.envNote} · {isConfigured ? t.synced(syncedCount) : t.queued(pendingCount)}
         </span>
-        <span>UFIT × Dot Inc. · Science without barriers</span>
       </footer>
-    </main>
+    </div>
   )
 }
 
@@ -467,14 +478,6 @@ function SupabaseStatus({
       <span>{label}</span>
       {pendingCount > 0 && <strong>{pendingCount}</strong>}
     </button>
-  )
-}
-
-function DotMark() {
-  return (
-    <div className="dot-mark" aria-hidden="true">
-      {Array.from({ length: 9 }, (_, index) => <span key={index} />)}
-    </div>
   )
 }
 
@@ -1058,4 +1061,3 @@ function LibraryPanel({
   )
 }
 
-export default App
