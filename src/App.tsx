@@ -40,11 +40,11 @@ import { buildLiveMatrix, countRaised, matrixToDots } from './lib/dotpad/sceneMa
 type ExperienceMode = 'live' | 'recorded'
 
 const pipeline = [
-  { label: 'Image recognition', detail: 'Scene + objects', Icon: ImageIcon },
-  { label: 'Text extraction', detail: 'Portuguese OCR', Icon: Type },
-  { label: 'Quiz analysis', detail: 'Intent + answers', Icon: ScanLine },
-  { label: 'Tactile generation', detail: '60 × 40 matrix', Icon: CircleDot },
-  { label: 'Caption generation', detail: 'Live PT-BR', Icon: Captions },
+  { label: 'Reconhecimento de imagem', detail: 'Cena + objetos', Icon: ImageIcon },
+  { label: 'Extração de texto', detail: 'OCR em português', Icon: Type },
+  { label: 'Análise de questionário', detail: 'Intenção + respostas', Icon: ScanLine },
+  { label: 'Geração tátil', detail: 'Matriz 60 × 40', Icon: CircleDot },
+  { label: 'Geração de legendas', detail: 'Ao vivo PT-BR', Icon: Captions },
 ]
 
 function App() {
@@ -302,18 +302,18 @@ function App() {
           <DotMark />
           <div>
             <div className="brand-title">Dot Lens</div>
-            <div className="brand-subtitle">for UFIT Science Accessibility</div>
+            <div className="brand-subtitle">Acessibilidade em Ciências UFIT</div>
           </div>
         </div>
 
-        <div className="mode-toggle" role="tablist" aria-label="Accessibility experience mode">
+        <div className="mode-toggle" role="tablist" aria-label="Modo de experiência de acessibilidade">
           <button
             className={experienceMode === 'live' ? 'active' : ''}
             onClick={() => changeExperienceMode('live')}
             role="tab"
             aria-selected={experienceMode === 'live'}
           >
-            <Radio size={14} /> Live Classroom
+            <Radio size={14} /> Sala de Aula Ao Vivo
           </button>
           <button
             className={experienceMode === 'recorded' ? 'active' : ''}
@@ -321,7 +321,7 @@ function App() {
             role="tab"
             aria-selected={experienceMode === 'recorded'}
           >
-            <MonitorPlay size={14} /> Recorded Lecture
+            <MonitorPlay size={14} /> Aula Gravada
           </button>
         </div>
 
@@ -340,7 +340,7 @@ function App() {
       {experienceMode === 'live' ? (
         <>
           <section className="opbar" aria-label="Lesson and demo controls">
-            <div className="opbar-lesson" role="tablist" aria-label="Science lessons">
+            <div className="opbar-lesson" role="tablist" aria-label="Aulas de ciências">
               {lessons.map((item) => (
                 <button
                   key={item.id}
@@ -355,7 +355,7 @@ function App() {
               ))}
             </div>
 
-            <div className="opbar-steps" role="tablist" aria-label="Demo steps">
+            <div className="opbar-steps" role="tablist" aria-label="Etapas da demonstração">
               {demoSteps.map((step) => (
                 <button
                   key={step.number}
@@ -376,7 +376,7 @@ function App() {
               className="next-step"
               onClick={() => selectStep(activeStep === 6 ? 1 : activeStep + 1)}
             >
-              {activeStep === 6 ? 'Restart' : 'Next'}
+              {activeStep === 6 ? 'Reiniciar' : 'Próximo'}
               <ChevronRight size={15} />
             </button>
           </section>
@@ -412,10 +412,10 @@ function App() {
 
       <footer className="footer-note">
         <span>
-          Prototype environment · Mock AI recognition and DotPad SDK output ·
-          {' '}{isConfigured ? `${syncedCount} events synced to Supabase` : `${pendingCount} events queued locally`}
+          Ambiente de demonstração · Reconhecimento IA simulado · Saída DotPad SDK ·
+          {' '}{isConfigured ? `${syncedCount} eventos sincronizados` : `${pendingCount} eventos na fila local`}
         </span>
-        <span>UFIT × Dot Inc. · Science without barriers</span>
+        <span>UFIT × Dot Inc. · Ciências sem barreiras</span>
       </footer>
     </main>
   )
@@ -438,14 +438,14 @@ function SupabaseStatus({
 }) {
   const label =
     state === 'setup_required'
-      ? 'Supabase setup'
+      ? 'Configurar dados'
       : state === 'syncing'
-        ? 'Syncing data'
+        ? 'Sincronizando'
         : state === 'error'
-          ? 'Sync retry'
+          ? 'Tentar novamente'
           : state === 'synced'
-            ? 'Data synced'
-            : 'Supabase ready'
+            ? 'Dados sincronizados'
+            : 'Dados prontos'
 
   const Icon =
     state === 'setup_required'
@@ -462,7 +462,7 @@ function SupabaseStatus({
     <button
       className={`supabase-pill ${state}`}
       onClick={onRetry}
-      title={error || (configured ? `${syncedCount} events synced` : 'Publishable key required')}
+      title={error || (configured ? `${syncedCount} eventos sincronizados` : 'Chave de acesso necessária')}
       type="button"
     >
       <Icon size={12} className={state === 'syncing' ? 'spin' : ''} />
@@ -508,8 +508,8 @@ function BoardPanel({ lesson }: { lesson: Lesson }) {
     <section className="panel board-panel">
       <PanelTitle
         number="01"
-        eyebrow="SOURCE CLASSROOM"
-        title="UFIT Smart Board"
+        eyebrow="FONTE: SALA DE AULA"
+        title="Lousa UFIT"
         icon={<Eye size={18} />}
       />
       <div className="smartboard-frame">
@@ -540,8 +540,8 @@ function BoardPanel({ lesson }: { lesson: Lesson }) {
         <div className="lens-corners" aria-hidden="true"><i /><i /><i /><i /></div>
       </div>
       <div className="source-meta">
-        <span><Activity size={13} /> HDMI classroom feed</span>
-        <span className="source-ready"><i /> Source detected</span>
+        <span><Activity size={13} /> Entrada HDMI da sala</span>
+        <span className="source-ready"><i /> Fonte detectada</span>
         <strong>1920 × 1080</strong>
       </div>
     </section>
@@ -704,10 +704,10 @@ function PipelineStrip({ activeStep, lesson }: { activeStep: number; lesson: Les
   const isRunning = activeStep > 1
 
   return (
-    <div className="pipeline-strip" aria-label="AI pipeline status">
+    <div className="pipeline-strip" aria-label="Status do pipeline de IA">
       <span className={`pstrip-engine ${isRunning ? 'running' : ''}`}>
         <ScanLine size={12} />
-        {isRunning ? 'RUNNING' : 'READY'}
+        {isRunning ? 'EM EXECUÇÃO' : 'PRONTO'}
       </span>
       <div className="pstrip-steps">
         {pipeline.map(({ label, Icon }, index) => {
@@ -760,7 +760,7 @@ function FocalCanvas(props: FocalProps) {
 
   return (
     <div className="focal-output">
-      <div className="output-tabs" role="tablist" aria-label="Accessibility output mode">
+      <div className="output-tabs" role="tablist" aria-label="Modo de saída de acessibilidade">
         <button
           role="tab"
           aria-selected={outputTab === 'blind'}
@@ -768,9 +768,9 @@ function FocalCanvas(props: FocalProps) {
           onClick={() => setOutputTab('blind')}
         >
           <CircleDot size={14} />
-          DotPad · Blind / Low Vision
+          DotPad · Cegueira / Baixa Visão
           <span className={props.dotPad.status === 'connected' ? 'tab-badge live' : 'tab-badge'}>
-            {props.dotPad.status === 'connected' ? 'LIVE' : 'PREVIEW'}
+            {props.dotPad.status === 'connected' ? 'AO VIVO' : 'PRÉVIA'}
           </span>
         </button>
         <button
@@ -780,9 +780,9 @@ function FocalCanvas(props: FocalProps) {
           onClick={() => setOutputTab('deaf')}
         >
           <Captions size={14} />
-          Captions · Deaf / HoH
+          Legendas · Surdez / D.A.
           <span className={props.step >= 4 ? 'tab-badge live' : 'tab-badge'}>
-            {props.step >= 4 ? 'ON' : 'STANDBY'}
+            {props.step >= 4 ? 'ATIVO' : 'ESPERA'}
           </span>
         </button>
       </div>
@@ -813,9 +813,9 @@ function SourceReadyCanvas({ lesson }: { lesson: Lesson }) {
   return (
     <div className="focal-ready">
       <div className="focal-ready-icon"><Sparkles size={28} /></div>
-      <h3>Board source captured</h3>
+      <h3>Conteúdo da lousa capturado</h3>
       <p className="focal-ready-desc">{lesson.boardPrompt}</p>
-      <p className="focal-ready-hint">Click <strong>Next →</strong> to run Dot Lens AI on this board.</p>
+      <p className="focal-ready-hint">Clique em <strong>Próximo →</strong> para executar o Dot Lens nesta lousa.</p>
       <div className="focal-ready-features">
         {pipeline.map(({ label, Icon }) => (
           <div key={label} className="focal-feature">
@@ -837,10 +837,10 @@ function PipelineDetailCanvas({ lesson }: { lesson: Lesson }) {
           <span />
         </div>
         <div>
-          <small>DOT LENS MODEL</small>
-          <strong>Multimodal analysis active</strong>
+          <small>MODELO DOT LENS</small>
+          <strong>Análise multimodal ativa</strong>
         </div>
-        <span className="model-state active">RUNNING</span>
+        <span className="model-state active">EM EXECUÇÃO</span>
       </div>
       <div className="pipeline-flow">
         {pipeline.map(({ label, detail, Icon }, index) => {
@@ -856,9 +856,9 @@ function PipelineDetailCanvas({ lesson }: { lesson: Lesson }) {
                 <span>{detail}</span>
               </div>
               <div className="pipeline-result">
-                {index === 0 && `${lesson.detected.objects.length} objects`}
-                {index === 1 && `${lesson.detected.textBlocks} blocks`}
-                {index === 2 && '1 quiz'}
+                {index === 0 && `${lesson.detected.objects.length} objetos`}
+                {index === 1 && `${lesson.detected.textBlocks} blocos`}
+                {index === 2 && '1 questionário'}
                 {index > 2 && <span>—</span>}
               </div>
               {index < pipeline.length - 1 && <div className="flow-line"><span /></div>}
@@ -868,7 +868,7 @@ function PipelineDetailCanvas({ lesson }: { lesson: Lesson }) {
       </div>
       <div className="recognition-card">
         <div className="recognition-head">
-          <span><ScanLine size={14} /> Recognition output</span>
+          <span><ScanLine size={14} /> Resultado do reconhecimento</span>
           <strong>{lesson.detected.confidence}</strong>
         </div>
         <div className="detected-tags">
@@ -884,8 +884,8 @@ function PipelineDetailCanvas({ lesson }: { lesson: Lesson }) {
       </div>
       <div className="privacy-note">
         <Eye size={13} />
-        <span>On-device processing</span>
-        <strong>No student data retained</strong>
+        <span>Processamento local</span>
+        <strong>Nenhum dado de aluno retido</strong>
       </div>
     </div>
   )
@@ -916,15 +916,15 @@ function BlindCanvas(props: BlindCanvasProps) {
             onClick={props.onSendScene}
           >
             <CircleDot size={13} />
-            {props.dotPad.status === 'connected' ? 'Send scene to DotPad' : 'Connect a DotPad to send'}
+            {props.dotPad.status === 'connected' ? 'Enviar cena ao DotPad' : 'Conecte o DotPad para enviar'}
           </button>
         </div>
       </div>
       <div className="audio-column">
         <div className="audio-card">
           <div className="audio-head">
-            <span><Headphones size={14} /> Audio description</span>
-            <small>EN · 0:18</small>
+            <span><Headphones size={14} /> Descrição de áudio</span>
+            <small>PT-BR · 0:18</small>
           </div>
           <p>{props.lesson.voiceDescription}</p>
           <div className="audio-player">
@@ -940,7 +940,7 @@ function BlindCanvas(props: BlindCanvasProps) {
           </div>
         </div>
         <div className="function-keys">
-          {['Explore', 'Labels', 'Repeat', 'Quiz'].map((label, index) => (
+          {['Explorar', 'Rótulos', 'Repetir', 'Questionário'].map((label, index) => (
             <button
               key={label}
               className={props.activeFunction === index ? 'active' : ''}
@@ -970,7 +970,7 @@ function DeafCanvas({
     <div className="deaf-canvas">
       <div className="caption-card">
         <div className="caption-meta">
-          <span><AudioLines size={13} /> LIVE TRANSCRIPT</span>
+          <span><AudioLines size={13} /> TRANSCRIÇÃO AO VIVO</span>
           <small>00:42</small>
         </div>
         <p>
@@ -981,7 +981,7 @@ function DeafCanvas({
         </div>
       </div>
       <div className="summary-card">
-        <div className="mini-card-title"><FileText size={13} /> Key summary</div>
+        <div className="mini-card-title"><FileText size={13} /> Resumo principal</div>
         <ul>
           {lesson.summary.map((item, index) => (
             <li key={item}><span>{index + 1}</span>{item}</li>
@@ -1047,8 +1047,8 @@ function QuizCard({
 }) {
   return (
     <div className={`quiz-card ${highlighted ? 'inner-focus' : ''}`}>
-      <div className="mini-card-title"><ScanLine size={13} /> Accessible quiz <span>1 / 3</span></div>
-      <p>{enabled ? lesson.quiz.question : 'Quiz becomes available at Step 5.'}</p>
+      <div className="mini-card-title"><ScanLine size={13} /> Questionário acessível <span>1 / 3</span></div>
+      <p>{enabled ? lesson.quiz.question : 'O questionário estará disponível na Etapa 5.'}</p>
       <div className="quiz-options">
         {lesson.quiz.options.map((option, index) => {
           const isSelected = selected === index
@@ -1086,25 +1086,25 @@ function LibraryPanel({
       <div className="library-header">
         <div className="library-title-icon"><Library size={20} /></div>
         <div>
-          <span>SHARED ACCESSIBLE CONTENT REPOSITORY</span>
-          <h2>Tactile World Science Library</h2>
+          <span>REPOSITÓRIO DE CONTEÚDO ACESSÍVEL</span>
+          <h2>Biblioteca Tátil Dot Inc – Ciências</h2>
         </div>
-        <p>Every converted lesson becomes a reusable, searchable accessibility package for teachers and students.</p>
+        <p>Cada aula convertida vira um pacote de acessibilidade reutilizável e pesquisável para professores e alunos.</p>
         <button className={saved ? 'saved' : ''}>
           {saved ? <Check size={14} /> : <BookOpen size={14} />}
-          {saved ? 'Saved to library' : 'Browse 1,284 assets'}
+          {saved ? 'Salvo na biblioteca' : 'Explorar 1.284 recursos'}
         </button>
       </div>
 
       <div className="library-flow">
         <div className="library-stat">
-          <strong>1,284</strong><span>Tactile graphics</span>
+          <strong>1.284</strong><span>Gráficos táteis</span>
         </div>
         <div className="library-stat">
-          <strong>312</strong><span>Science lessons</span>
+          <strong>312</strong><span>Aulas de ciências</span>
         </div>
         <div className="library-stat">
-          <strong>18</strong><span>Languages</span>
+          <strong>18</strong><span>Idiomas</span>
         </div>
         <div className="asset-card featured">
           <div className="asset-preview" style={{ background: lesson.accentSoft }}>
@@ -1114,24 +1114,24 @@ function LibraryPanel({
             </div>
           </div>
           <div className="asset-copy">
-            <span className="new-asset">{saved ? 'JUST SAVED' : 'CURRENT LESSON'}</span>
+            <span className="new-asset">{saved ? 'RECÉM SALVO' : 'AULA ATUAL'}</span>
             <h3>{lesson.library.asset}</h3>
-            <p>{lesson.grade} · {lesson.library.pages} tactile pages · Audio + captions + quiz</p>
+            <p>{lesson.grade} · {lesson.library.pages} páginas táteis · Áudio + legendas + questionário</p>
             <div className="asset-tags">{lesson.library.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
           </div>
           <div className="asset-version">
             <strong>{lesson.library.version}</strong>
-            <span>{saved ? 'Synced now' : 'Draft package'}</span>
+            <span>{saved ? 'Sincronizado agora' : 'Pacote em rascunho'}</span>
           </div>
         </div>
         <div className="asset-card compact">
           <div className="compact-icon"><Waves size={19} /></div>
-          <div><span>COLLECTION</span><strong>Brazil Science Essentials</strong><small>42 accessible packages</small></div>
+          <div><span>COLEÇÃO</span><strong>Essenciais de Ciências – Brasil</strong><small>42 pacotes acessíveis</small></div>
           <ChevronRight size={16} />
         </div>
         <div className="asset-card compact">
           <div className="compact-icon purple"><Sun size={19} /></div>
-          <div><span>MOST USED</span><strong>Earth & Space</strong><small>98% teacher rating</small></div>
+          <div><span>MAIS USADO</span><strong>Terra e Espaço</strong><small>98% aprovação docente</small></div>
           <ChevronRight size={16} />
         </div>
       </div>

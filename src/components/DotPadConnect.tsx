@@ -23,7 +23,7 @@ export default function DotPadConnect({ dotPad, variant = 'full' }: Props) {
     return (
       <div className="dotpad-connect unsupported" role="status">
         <Plug size={13} />
-        <span>Real DotPad output needs Chrome or Edge (Web Bluetooth / USB) over HTTPS.</span>
+        <span>A saída real do DotPad requer Chrome ou Edge (Web Bluetooth / USB) via HTTPS.</span>
       </div>
     )
   }
@@ -33,9 +33,9 @@ export default function DotPadConnect({ dotPad, variant = 'full' }: Props) {
       <div className={`dotpad-connect connected ${variant}`} role="status">
         <span className="dotpad-dot" />
         <span className="dotpad-connect-name">{deviceName ?? 'DotPad'}</span>
-        <span className="dotpad-connect-tag">CONNECTED</span>
+        <span className="dotpad-connect-tag">CONECTADO</span>
         <button type="button" className="dotpad-disconnect" onClick={disconnect}>
-          <Unplug size={12} /> Disconnect
+          <Unplug size={12} /> Desconectar
         </button>
       </div>
     )
@@ -45,7 +45,7 @@ export default function DotPadConnect({ dotPad, variant = 'full' }: Props) {
     return (
       <div className={`dotpad-connect connecting ${variant}`} role="status">
         <Loader2 size={13} className="dotpad-spin" />
-        <span>Connecting to DotPad…</span>
+        <span>Conectando ao DotPad…</span>
       </div>
     )
   }
@@ -56,7 +56,7 @@ export default function DotPadConnect({ dotPad, variant = 'full' }: Props) {
       <div className="dotpad-connect-actions">
         {bleSupported && (
           <button type="button" className="dotpad-connect-btn" onClick={connectBle}>
-            <Bluetooth size={13} /> Connect DotPad (Bluetooth)
+            <Bluetooth size={13} /> Conectar DotPad (Bluetooth)
           </button>
         )}
         {usbSupported && (

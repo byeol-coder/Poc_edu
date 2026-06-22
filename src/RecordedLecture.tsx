@@ -177,28 +177,28 @@ export default function RecordedLecture({ sessionId, onTrack, dotPad }: Props) {
       <section className="recorded-story">
         <div className="recorded-story-icon"><MonitorPlay size={21} /></div>
         <div>
-          <span>TACTILE WORLD EDUCATION · RECORDED LECTURE MODE</span>
-          <h1>The same accessibility engine can support both live classrooms and recorded online lectures.</h1>
+          <span>TACTILE WORLD EDUCATION · MODO AULA GRAVADA</span>
+          <h1>O mesmo motor de acessibilidade que apoia a sala de aula ao vivo também serve aulas gravadas online.</h1>
         </div>
         <div className="story-translations">
-          <p>동일한 접근성 엔진을 통해 현장 수업뿐 아니라 영상 기반 인터넷 강의도 통합교육 콘텐츠로 확장할 수 있습니다.</p>
           <p>O mesmo motor de acessibilidade pode apoiar tanto aulas presenciais quanto videoaulas gravadas.</p>
+          <p>The same accessibility engine can support both live classrooms and recorded online lectures.</p>
         </div>
       </section>
 
-      <section className="recorded-stepbar" aria-label="Recorded lecture steps">
+      <section className="recorded-stepbar" aria-label="Etapas da aula gravada">
         <button className={phase === 7 ? 'active' : 'done'} onClick={() => setPhase(7)}>
           <span>{phase === 8 ? <Check size={13} /> : '7'}</span>
-          <div><small>STEP 7</small><strong>Recorded Lecture Mode</strong></div>
+          <div><small>ETAPA 7</small><strong>Modo Aula Gravada</strong></div>
         </button>
         <div className="recorded-step-line"><i className={phase === 8 ? 'done' : ''} /></div>
         <button className={phase === 8 ? 'active' : ''} onClick={() => setPhase(8)}>
           <span>8</span>
-          <div><small>STEP 8</small><strong>Tactile World - Education Lecture Pack</strong></div>
+          <div><small>ETAPA 8</small><strong>Tactile World – Pacote de Aula</strong></div>
         </button>
         <div className="recorded-flow-copy">
-          VIDEO <ChevronRight size={12} /> SCENE ANALYSIS <ChevronRight size={12} />
-          TACTILE + CAPTIONS <ChevronRight size={12} /> QUIZ <ChevronRight size={12} /> LECTURE PACK
+          VÍDEO <ChevronRight size={12} /> ANÁLISE DE CENA <ChevronRight size={12} />
+          TÁTIL + LEGENDAS <ChevronRight size={12} /> QUESTIONÁRIO <ChevronRight size={12} /> PACOTE DE AULA
         </div>
       </section>
 
@@ -265,8 +265,8 @@ function RecordedPlayer({
     <section className="recorded-panel lecture-player-panel">
       <RecordedTitle
         number="07A"
-        eyebrow="UFIT VIDEO SOURCE"
-        title="UFIT Recorded Science Lecture"
+        eyebrow="FONTE: VÍDEO UFIT"
+        title="Aula de Ciências UFIT – Gravada"
         icon={<Video size={18} />}
       />
 
@@ -281,11 +281,11 @@ function RecordedPlayer({
         <div className="video-dim" />
         <div className="video-topbar">
           <span>UFIT · CIÊNCIAS</span>
-          <span className="recorded-badge"><i /> RECORDED</span>
+          <span className="recorded-badge"><i /> GRAVADO</span>
         </div>
         <div className="video-science-overlay">
           <PlantLectureScene focus={marker.type} />
-          <span>DOT LENS SCIENCE SCENE · {marker.title.toUpperCase()}</span>
+          <span>CENA DOT LENS · {marker.title.toUpperCase()}</span>
         </div>
         <button className="video-play-main" onClick={onToggleVideo} aria-label={isPlaying ? 'Pause recorded lecture' : 'Play recorded lecture'}>
           {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
@@ -297,8 +297,8 @@ function RecordedPlayer({
 
       <div className="lecture-meta">
         <div>
-          <span>GRADE 5 SCIENCE · RECORDED MODULE</span>
-          <h2>Plant Structure - Grade 5 Science</h2>
+          <span>5º ANO · CIÊNCIAS · MÓDULO GRAVADO</span>
+          <h2>Estrutura das Plantas – Ciências 5º Ano</h2>
         </div>
         <div className="lecture-duration"><Clock3 size={13} /> 04:18</div>
       </div>
@@ -306,7 +306,7 @@ function RecordedPlayer({
       <div className="video-timeline">
         <div className="timeline-time">
           <strong>{marker.time}</strong><span>/ 04:18</span>
-          <small>Current scene · {marker.title}</small>
+          <small>Cena atual · {marker.title}</small>
         </div>
         <div className="timeline-track">
           <div className="timeline-fill" style={{ width: `${progress}%` }} />
@@ -328,8 +328,8 @@ function RecordedPlayer({
 
       <div className="lecture-source-note">
         <MonitorPlay size={13} />
-        <span>Video source: Inclusive Education Strategies in Brazil</span>
-        <strong>Authorized PoC media · Mock analysis</strong>
+        <span>Fonte de vídeo: Estratégias de Educação Inclusiva no Brasil</span>
+        <strong>Mídia de demonstração autorizada · Análise simulada</strong>
       </div>
     </section>
   )
@@ -340,16 +340,16 @@ function VideoAnalysis({ activeMarker }: { activeMarker: number }) {
     <section className="recorded-panel video-analysis-panel">
       <RecordedTitle
         number="07B"
-        eyebrow="MULTIMODAL VIDEO PIPELINE"
-        title="Dot Lens Video Analysis"
+        eyebrow="PIPELINE DE VÍDEO MULTIMODAL"
+        title="Análise de Vídeo Dot Lens"
         icon={<ScanLine size={18} />}
       />
 
       <div className="video-ai-card">
         <div className="video-ai-orb"><Sparkles size={22} /><i /></div>
         <div>
-          <span>DOT LENS VIDEO MODEL · MOCK</span>
-          <strong>Timeline-aware analysis complete</strong>
+          <span>MODELO DOT LENS – SIMULAÇÃO</span>
+          <strong>Análise temporal completa</strong>
         </div>
         <small>98.2%</small>
       </div>
@@ -366,7 +366,7 @@ function VideoAnalysis({ activeMarker }: { activeMarker: number }) {
 
       <div className="scene-intelligence">
         <div className="scene-intelligence-head">
-          <span><CircleDot size={14} /> Scene intelligence</span>
+          <span><CircleDot size={14} /> Inteligência de cena</span>
           <strong>{lectureMarkers[activeMarker].time}</strong>
         </div>
         <div className="scene-wave">
@@ -375,14 +375,14 @@ function VideoAnalysis({ activeMarker }: { activeMarker: number }) {
           ))}
         </div>
         <div className="scene-tags">
-          <span>plant</span><span>root</span><span>soil</span><span>teacher speech</span>
+          <span>planta</span><span>raiz</span><span>solo</span><span>fala da professora</span>
         </div>
       </div>
 
       <div className="video-privacy">
         <Accessibility size={13} />
-        <span>Accessibility metadata only</span>
-        <strong>No student personal data stored</strong>
+        <span>Somente metadados de acessibilidade</span>
+        <strong>Nenhum dado pessoal de aluno armazenado</strong>
       </div>
     </section>
   )
@@ -423,20 +423,20 @@ function LectureOutputs({
     <section className="recorded-panel lecture-outputs-panel">
       <RecordedTitle
         number="07C"
-        eyebrow="TIMELINE-SYNCHRONIZED EXPERIENCE"
-        title="Accessible Lecture Outputs"
+        eyebrow="EXPERIÊNCIA SINCRONIZADA COM VÍDEO"
+        title="Saídas Acessíveis da Aula"
         icon={<Accessibility size={18} />}
       />
 
-      <div className="lecture-output-tabs" role="tablist" aria-label="Accessible lecture output tabs">
+      <div className="lecture-output-tabs" role="tablist" aria-label="Abas de saída acessível da aula">
         <button className={activeTab === 'blind' ? 'active' : ''} onClick={() => onTab('blind')} role="tab">
-          <CircleDot size={13} /> Blind / Low Vision
+          <CircleDot size={13} /> Cegueira / Baixa Visão
         </button>
         <button className={activeTab === 'deaf' ? 'active' : ''} onClick={() => onTab('deaf')} role="tab">
-          <Captions size={13} /> Deaf / Hard of Hearing
+          <Captions size={13} /> Surdez / Deficiência Auditiva
         </button>
         <button className={activeTab === 'quiz' ? 'active' : ''} onClick={() => onTab('quiz')} role="tab">
-          <ListChecks size={13} /> Lecture Quiz
+          <ListChecks size={13} /> Questionário da Aula
         </button>
       </div>
 
@@ -445,16 +445,16 @@ function LectureOutputs({
           <div className="lecture-dotpad-column">
             <RecordedDotPad markerIndex={markerIndex} sent={sentToDotPad} />
             <div className="scene-sync-label">
-              <i /><span>{marker.time} VIDEO SCENE</span><ChevronRight size={12} /><strong>DOTPAD 60 × 40</strong>
+              <i /><span>{marker.time} CENA DE VÍDEO</span><ChevronRight size={12} /><strong>DOTPAD 60 × 40</strong>
             </div>
           </div>
           <div className="lecture-access-copy">
             <div className="tactile-scene-title">
-              <span>SCENE {markerIndex + 1} OF 4</span>
+              <span>CENA {markerIndex + 1} DE 4</span>
               <h3>{marker.tactileTitle}</h3>
             </div>
             <div className={`lecture-audio-description ${audioReplay ? 'playing' : ''}`}>
-              <div><Headphones size={14} /><span>Audio description</span><small>EN · 0:14</small></div>
+              <div><Headphones size={14} /><span>Descrição de áudio</span><small>PT-BR · 0:14</small></div>
               <p>{marker.description}</p>
               <div className="mini-audio-wave">
                 {[42, 71, 53, 88, 61, 77, 48, 93, 58, 82, 66, 46].map((height, index) => (
@@ -463,27 +463,27 @@ function LectureOutputs({
               </div>
             </div>
             <div className="exploration-steps">
-              <span>TACTILE EXPLORATION PATH</span>
+              <span>PERCURSO DE EXPLORAÇÃO TÁTIL</span>
               <ol>
-                <li><i>1</i>Find the stem in the center.</li>
-                <li><i>2</i>Move downward to the root.</li>
-                <li><i>3</i>Follow the root branches outward.</li>
+                <li><i>1</i>Localize o caule no centro.</li>
+                <li><i>2</i>Desça até encontrar a raiz.</li>
+                <li><i>3</i>Siga os ramos da raiz para os lados.</li>
               </ol>
             </div>
             <DotPadConnect dotPad={dotPad} />
             <div className="lecture-action-buttons">
-              <button onClick={onReplay}><RotateCcw size={12} /> Replay audio description</button>
+              <button onClick={onReplay}><RotateCcw size={12} /> Repetir descrição de áudio</button>
               <button className={sentToDotPad ? 'success' : 'primary'} onClick={onSend}>
                 {sentToDotPad ? <Check size={12} /> : <Send size={12} />}
                 {sentToDotPad
                   ? dotPad.status === 'connected'
-                    ? 'Scene sent to DotPad'
-                    : 'Scene rendered (preview)'
+                    ? 'Cena enviada ao DotPad'
+                    : 'Cena renderizada (pré-visualização)'
                   : dotPad.status === 'connected'
-                    ? 'Send scene to DotPad'
-                    : 'Render scene (connect to send)'}
+                    ? 'Enviar cena ao DotPad'
+                    : 'Renderizar cena (conecte para enviar)'}
               </button>
-              <button onClick={onNext}>Next tactile scene <ChevronRight size={12} /></button>
+              <button onClick={onNext}>Próxima cena tátil <ChevronRight size={12} /></button>
             </div>
           </div>
         </div>
@@ -492,33 +492,33 @@ function LectureOutputs({
       {activeTab === 'deaf' && (
         <div className="lecture-tab-content deaf-lecture-tab">
           <div className="caption-readiness">
-            <span><Captions size={14} /> PT-BR caption-ready</span>
-            <span><Languages size={14} /> Libras-ready · Interpreter Support Mode</span>
+            <span><Captions size={14} /> Legendas PT-BR prontas</span>
+            <span><Languages size={14} /> Pronto para Libras · Modo de Apoio ao Intérprete</span>
           </div>
           <div className="recorded-caption-card">
-            <div><AudioLines size={14} /><span>VIDEO CAPTION · {marker.time}</span><i>PT-BR</i></div>
-            <p>“Hoje vamos aprender como a raiz, o caule, as folhas e as flores ajudam a planta a viver.”</p>
+            <div><AudioLines size={14} /><span>LEGENDA · {marker.time}</span><i>PT-BR</i></div>
+            <p>"Hoje vamos aprender como a raiz, o caule, as folhas e as flores ajudam a planta a viver."</p>
             <div className="caption-progress"><i /></div>
           </div>
           <div className="recorded-summary-grid">
             <div>
-              <span><FileText size={13} /> KEY SUMMARY</span>
-              <p><strong>Key point:</strong> Roots absorb water from the soil. Leaves help the plant make food using sunlight.</p>
+              <span><FileText size={13} /> RESUMO PRINCIPAL</span>
+              <p><strong>Ponto principal:</strong> As raízes absorvem água do solo. As folhas ajudam a planta a produzir alimento com a luz do sol.</p>
             </div>
             <div>
-              <span><Sparkles size={13} /> IMPORTANT CONCEPTS</span>
+              <span><Sparkles size={13} /> CONCEITOS IMPORTANTES</span>
               <div className="term-cards">
-                <button>RAIZ<small>root</small></button>
-                <button>CAULE<small>stem</small></button>
-                <button>FOLHAS<small>leaves</small></button>
-                <button>FOTOSSÍNTESE<small>photosynthesis</small></button>
+                <button>RAIZ<small>raiz</small></button>
+                <button>CAULE<small>caule</small></button>
+                <button>FOLHAS<small>folhas</small></button>
+                <button>FOTOSSÍNTESE<small>fotossíntese</small></button>
               </div>
             </div>
           </div>
           <div className="interpreter-note">
             <Accessibility size={14} />
-            <span>Interpreter cue prepared for the selected science scene.</span>
-            <strong>Scene vocabulary synced</strong>
+            <span>Sinalização preparada para a cena de ciências selecionada.</span>
+            <strong>Vocabulário da cena sincronizado</strong>
           </div>
         </div>
       )}
@@ -526,12 +526,12 @@ function LectureOutputs({
       {activeTab === 'quiz' && (
         <div className="lecture-tab-content lecture-quiz-tab">
           <div className="quiz-video-context">
-            <span>QUIZ MOMENT · 03:00</span>
-            <strong>Which part of the plant absorbs water from the soil?</strong>
-            <p>Converted from the UFIT lecture into an accessible text, audio, and tactile-supported question.</p>
+            <span>MOMENTO DO QUESTIONÁRIO · 03:00</span>
+            <strong>Qual parte da planta absorve água do solo?</strong>
+            <p>Convertido da aula UFIT em uma pergunta acessível com suporte de texto, áudio e tátil.</p>
           </div>
           <div className="lecture-quiz-options">
-            {['Leaf', 'Flower', 'Root', 'Stem'].map((option, index) => {
+            {['Folha', 'Flor', 'Raiz', 'Caule'].map((option, index) => {
               const selected = quizAnswer === index
               const correct = selected && index === 2
               return (
@@ -549,13 +549,13 @@ function LectureOutputs({
           {quizAnswer !== null && (
             <div className={quizAnswer === 2 ? 'lecture-feedback correct' : 'lecture-feedback wrong'}>
               {quizAnswer === 2
-                ? 'Correct. The root absorbs water from the soil.'
-                : 'Try again. Explore the tactile root scene once more.'}
+                ? 'Correto! A raiz absorve água do solo.'
+                : 'Tente novamente. Explore a cena tátil da raiz mais uma vez.'}
             </div>
           )}
           <div className="quiz-review-actions">
-            <button onClick={onReturnQuiz}><Clock3 size={12} /> Return to 03:00 on timeline</button>
-            <button onClick={onReviewTactile}><CircleDot size={12} /> Review tactile scene before answering</button>
+            <button onClick={onReturnQuiz}><Clock3 size={12} /> Voltar a 03:00 na linha do tempo</button>
+            <button onClick={onReviewTactile}><CircleDot size={12} /> Revisar cena tátil antes de responder</button>
           </div>
         </div>
       )}
@@ -577,13 +577,13 @@ function EducationLibrary({
       <div className="education-library-head">
         <div className="education-icon"><Library size={20} /></div>
         <div>
-          <span>STEP 8 · REUSABLE ACCESSIBLE ONLINE LEARNING</span>
-          <h2>Tactile World - Education Lecture Packs</h2>
+          <span>ETAPA 8 · APRENDIZADO ONLINE ACESSÍVEL E REUTILIZÁVEL</span>
+          <h2>Tactile World – Pacotes de Aula</h2>
         </div>
-        <p>Recorded UFIT lessons become reviewable packages containing synchronized tactile scenes, captions, summaries, and quizzes.</p>
+        <p>Aulas UFIT gravadas tornam-se pacotes revisáveis com cenas táteis sincronizadas, legendas, resumos e questionários.</p>
         <button className={saved ? 'saved' : ''} onClick={onSave}>
           {saved ? <Check size={14} /> : <BookOpenCheck size={14} />}
-          {saved ? 'Plant lecture pack saved' : 'Save current lecture pack'}
+          {saved ? 'Pacote de aula de plantas salvo' : 'Salvar pacote da aula atual'}
         </button>
       </div>
 
@@ -592,25 +592,25 @@ function EducationLibrary({
           <article key={pack.id} className={`education-pack-card ${pack.tone} ${index === 0 && saved ? 'just-saved' : ''}`}>
             <div className="pack-visual">
               {index === 0 ? <PlantLectureScene focus="tactile" /> : index === 1 ? <MiniSolar /> : <MiniWater />}
-              <span>{index === 0 ? 'BIOLOGY' : index === 1 ? 'ASTRONOMY' : 'EARTH SCIENCE'}</span>
+              <span>{index === 0 ? 'BIOLOGIA' : index === 1 ? 'ASTRONOMIA' : 'CIÊNCIAS DA TERRA'}</span>
             </div>
             <div className="pack-content">
               <div className="pack-title-row">
-                <div><small>UFIT RECORDED LECTURE</small><h3>{pack.title}</h3></div>
-                <span className={`pack-status ${pack.status.toLowerCase().replace(' ', '-')}`}>{index === 0 && saved ? 'Saved' : pack.status}</span>
+                <div><small>AULA GRAVADA UFIT</small><h3>{pack.title}</h3></div>
+                <span className={`pack-status ${pack.status.toLowerCase().replace(' ', '-')}`}>{index === 0 && saved ? 'Salvo' : pack.status}</span>
               </div>
               <div className="pack-specs">
-                <span><strong>Science</strong>Subject</span>
-                <span><strong>{pack.grade}</strong>Grade level</span>
-                <span><strong>{pack.duration}</strong>Video duration</span>
-                <span><strong>{pack.scenes}</strong>Tactile scenes</span>
-                <span><strong>{pack.quizzes}</strong>Quiz moments</span>
+                <span><strong>Ciências</strong>Disciplina</span>
+                <span><strong>{pack.grade}</strong>Ano escolar</span>
+                <span><strong>{pack.duration}</strong>Duração</span>
+                <span><strong>{pack.scenes}</strong>Cenas táteis</span>
+                <span><strong>{pack.quizzes}</strong>Questionários</span>
               </div>
               <div className="pack-readiness">
-                <span><Check size={10} /> PT-BR captions ready</span>
-                <span><Check size={10} /> DotPad-ready</span>
-                <span><Check size={10} /> Summaries</span>
-                <span><Check size={10} /> Student accessibility modes</span>
+                <span><Check size={10} /> Legendas PT-BR prontas</span>
+                <span><Check size={10} /> Pronto para DotPad</span>
+                <span><Check size={10} /> Resumos incluídos</span>
+                <span><Check size={10} /> Modos de acessibilidade</span>
               </div>
             </div>
           </article>
@@ -648,7 +648,7 @@ function RecordedDotPad({ markerIndex, sent }: { markerIndex: number; sent: bool
 
   return (
     <div className={`recorded-dotpad ${sent ? 'sent' : ''}`}>
-      <div className="recorded-dotpad-head"><span>DOTPAD</span><small>60 × 40 · SCENE SYNC</small><i /></div>
+      <div className="recorded-dotpad-head"><span>DOTPAD</span><small>60 × 40 · SINC. DE CENA</small><i /></div>
       <svg viewBox="0 0 300 200" aria-label="Recorded lecture tactile scene DotPad preview">
         <rect width="300" height="200" rx="7" fill="#101722" />
         {dots.map((dot) => (
@@ -662,7 +662,7 @@ function RecordedDotPad({ markerIndex, sent }: { markerIndex: number; sent: bool
           />
         ))}
       </svg>
-      <div className="recorded-dotpad-keys"><span>PREV</span><span>EXPLORE</span><span>LABELS</span><span>NEXT</span></div>
+      <div className="recorded-dotpad-keys"><span>ANT</span><span>EXPLORAR</span><span>RÓTULOS</span><span>PRÓX</span></div>
     </div>
   )
 }
