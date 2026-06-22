@@ -29,20 +29,22 @@ import {
   Type,
   Volume2,
   Waves,
-  Zap,
 } from 'lucide-react'
 import { demoSteps, lessons, type Lesson, type LessonId } from './data'
 import { useSupabaseTracking, type SyncState } from './hooks/useSupabaseTracking'
 import RecordedLecture from './RecordedLecture'
+import DotPadConnect from './components/DotPadConnect'
+import { useDotPad, type DotPadController } from './lib/dotpad/useDotPad'
+import { buildLiveMatrix, countRaised, matrixToDots } from './lib/dotpad/sceneMatrix'
 
 type ExperienceMode = 'live' | 'recorded'
 
 const pipeline = [
-  { label: 'Image recognition', detail: 'Scene + objects', Icon: ImageIcon },
-  { label: 'Text extraction', detail: 'Portuguese OCR', Icon: Type },
-  { label: 'Quiz analysis', detail: 'Intent + answers', Icon: ScanLine },
-  { label: 'Tactile generation', detail: '60 × 40 matrix', Icon: CircleDot },
-  { label: 'Caption generation', detail: 'Live PT-BR', Icon: Captions },
+  { label: 'Reconhecimento de imagem', detail: 'Cena + objetos', Icon: ImageIcon },
+  { label: 'Extração de texto', detail: 'OCR em português', Icon: Type },
+  { label: 'Análise de questionário', detail: 'Intenção + respostas', Icon: ScanLine },
+  { label: 'Geração tátil', detail: 'Matriz 60 × 40', Icon: CircleDot },
+  { label: 'Geração de legendas', detail: 'Ao vivo PT-BR', Icon: Captions },
 ]
 
 function App() {
@@ -56,6 +58,7 @@ function App() {
   const [recordedSessionId] = useState(() => crypto.randomUUID())
   const quizStartedAt = useRef<number | null>(null)
   const initializedSessions = useRef(new Set<string>())
+  const dotPad = useDotPad()
   const {
     isConfigured,
     syncState,
@@ -67,7 +70,6 @@ function App() {
   } = useSupabaseTracking()
 
   const lesson = lessons.find((item) => item.id === lessonId) ?? lessons[0]
-  const currentStep = demoSteps[activeStep - 1]
 
   useEffect(() => {
     if (initializedSessions.current.has(sessionId)) return
@@ -256,6 +258,25 @@ function App() {
     })
   }
 
+  const sendLiveScene = () => {
+    const matrix = buildLiveMatrix(lesson.id, true)
+    const delivered = dotPad.sendMatrix(matrix)
+    void track({
+      sessionId,
+      lessonId: lesson.id,
+      eventType: 'tactile_generated',
+      demoStep: Math.max(activeStep, 3),
+      payload: {
+        locale: 'en',
+        matrix: { columns: 60, rows: 40, pins: 2400 },
+        raised_pins: countRaised(matrix),
+        delivered_to_hardware: delivered,
+        device_name: delivered ? dotPad.deviceName : null,
+        transport: delivered ? dotPad.transport : 'preview_only',
+      },
+    })
+  }
+
   const selectQuizAnswer = (index: number) => {
     setSelectedAnswer(index)
     void track({
@@ -281,17 +302,27 @@ function App() {
           <DotMark />
           <div>
             <div className="brand-title">Dot Lens</div>
-            <div className="brand-subtitle">for UFIT Science Accessibility</div>
+            <div className="brand-subtitle">Acessibilidade em Ciências UFIT</div>
           </div>
         </div>
 
-        <div className="partnership-message">
-          <span className="partner ufit">UFIT</span>
-          <span className="message-copy">
-            <strong>UFIT provides the digital science classroom.</strong>
-            <span>Dot provides the accessibility engine.</span>
-          </span>
-          <span className="partner dot">dot.</span>
+        <div className="mode-toggle" role="tablist" aria-label="Modo de experiência de acessibilidade">
+          <button
+            className={experienceMode === 'live' ? 'active' : ''}
+            onClick={() => changeExperienceMode('live')}
+            role="tab"
+            aria-selected={experienceMode === 'live'}
+          >
+            <Radio size={14} /> Sala de Aula Ao Vivo
+          </button>
+          <button
+            className={experienceMode === 'recorded' ? 'active' : ''}
+            onClick={() => changeExperienceMode('recorded')}
+            role="tab"
+            aria-selected={experienceMode === 'recorded'}
+          >
+            <MonitorPlay size={14} /> Aula Gravada
+          </button>
         </div>
 
         <div className="top-actions">
@@ -303,142 +334,88 @@ function App() {
             error={lastError}
             onRetry={() => void retry()}
           />
-          <div className="live-pill"><span /> LIVE PoC</div>
-          <div className="region-pill">São Paulo · BR</div>
         </div>
       </header>
 
-      <section className="experience-switchbar">
-        <div>
-          <span>ACCESSIBILITY ENGINE MODE</span>
-          <div className="experience-switch" role="tablist" aria-label="Accessibility experience mode">
-            <button
-              className={experienceMode === 'live' ? 'active' : ''}
-              onClick={() => changeExperienceMode('live')}
-              role="tab"
-              aria-selected={experienceMode === 'live'}
-            >
-              <Radio size={14} /> Live Classroom
-            </button>
-            <button
-              className={experienceMode === 'recorded' ? 'active' : ''}
-              onClick={() => changeExperienceMode('recorded')}
-              role="tab"
-              aria-selected={experienceMode === 'recorded'}
-            >
-              <MonitorPlay size={14} /> Recorded Lecture
-            </button>
-          </div>
-        </div>
-        <p>
-          <strong>One Dot Lens engine.</strong>
-          {experienceMode === 'live'
-            ? ' Real-time accessibility for the classroom.'
-            : ' Timeline-synchronized accessibility for online lectures.'}
-        </p>
-        <div className={`mode-state ${experienceMode}`}>
-          {experienceMode === 'live' ? <Radio size={13} /> : <MonitorPlay size={13} />}
-          {experienceMode === 'live' ? 'LIVE INPUT' : 'RECORDED MEDIA'}
-        </div>
-      </section>
-
       {experienceMode === 'live' ? (
         <>
-          <section className="control-strip">
-            <div className="lesson-control">
-              <span className="control-label">SCIENCE LESSON</span>
-              <div className="lesson-tabs" role="tablist" aria-label="Science lessons">
-                {lessons.map((item) => (
-                  <button
-                    key={item.id}
-                    className={item.id === lessonId ? 'lesson-tab active' : 'lesson-tab'}
-                    onClick={() => changeLesson(item.id)}
-                    role="tab"
-                    aria-selected={item.id === lessonId}
-                  >
-                    <span>{item.index}</span>
-                    {item.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="sync-state">
-              <Zap size={14} />
-              <span>Lens sync</span>
-              <strong>34 ms</strong>
-            </div>
-          </section>
-
-          <section className="demo-steps" aria-label="Demo steps">
-            <div className="step-heading">
-              <span>DEMO FLOW</span>
-              <strong>Step {activeStep} of 6</strong>
-            </div>
-            <div className="step-track">
-              {demoSteps.map((step, index) => (
+          <section className="opbar" aria-label="Lesson and demo controls">
+            <div className="opbar-lesson" role="tablist" aria-label="Aulas de ciências">
+              {lessons.map((item) => (
                 <button
-                  key={step.number}
-                  className={`step-button ${activeStep === step.number ? 'active' : ''} ${activeStep > step.number ? 'done' : ''}`}
-                  onClick={() => selectStep(step.number)}
-                  aria-current={activeStep === step.number ? 'step' : undefined}
+                  key={item.id}
+                  className={item.id === lessonId ? 'lesson-tab active' : 'lesson-tab'}
+                  onClick={() => changeLesson(item.id)}
+                  role="tab"
+                  aria-selected={item.id === lessonId}
                 >
-                  <span className="step-number">
-                    {activeStep > step.number ? <Check size={13} strokeWidth={3} /> : step.number}
-                  </span>
-                  <span className="step-copy">
-                    <small>STEP {step.number}</small>
-                    <strong>{step.short}</strong>
-                  </span>
-                  {index < demoSteps.length - 1 && <ChevronRight className="step-arrow" size={14} />}
+                  <span>{item.index}</span>
+                  {item.title}
                 </button>
               ))}
             </div>
+
+            <div className="opbar-steps" role="tablist" aria-label="Etapas da demonstração">
+              {demoSteps.map((step) => (
+                <button
+                  key={step.number}
+                  className={`step-chip ${activeStep === step.number ? 'active' : ''} ${activeStep > step.number ? 'done' : ''}`}
+                  onClick={() => selectStep(step.number)}
+                  aria-current={activeStep === step.number ? 'step' : undefined}
+                  title={step.label}
+                >
+                  <span className="step-dot">
+                    {activeStep > step.number ? <Check size={12} strokeWidth={3} /> : step.number}
+                  </span>
+                  <span className="step-chip-label">{step.short}</span>
+                </button>
+              ))}
+            </div>
+
             <button
               className="next-step"
               onClick={() => selectStep(activeStep === 6 ? 1 : activeStep + 1)}
             >
-              {activeStep === 6 ? 'Restart demo' : `Next · ${demoSteps[activeStep].short}`}
+              {activeStep === 6 ? 'Reiniciar' : 'Próximo'}
               <ChevronRight size={15} />
             </button>
           </section>
 
-          <div className="status-ribbon">
-            <Sparkles size={15} />
-            <span>NOW DEMONSTRATING</span>
-            <strong>{currentStep.label}</strong>
-            <div className="ribbon-progress"><span style={{ width: `${activeStep * (100 / 6)}%` }} /></div>
+          <PipelineStrip activeStep={activeStep} lesson={lesson} />
+          <div className="workspace">
+            <aside className="source-pane">
+              <BoardPanel lesson={lesson} />
+            </aside>
+            <div className="focal-scroll">
+              <FocalCanvas
+                step={activeStep}
+                lesson={lesson}
+                isPlaying={isPlaying}
+                onTogglePlaying={toggleAudio}
+                selectedAnswer={selectedAnswer}
+                onSelectAnswer={selectQuizAnswer}
+                activeFunction={activeFunction}
+                onFunction={selectFunction}
+                dotPad={dotPad}
+                onSendScene={sendLiveScene}
+              />
+            </div>
           </div>
-
-          <section className="workspace-grid">
-            <BoardPanel lesson={lesson} highlighted={activeStep === 1} />
-            <PipelinePanel lesson={lesson} activeStep={activeStep} highlighted={activeStep === 2} />
-            <OutputsPanel
-              lesson={lesson}
-              activeStep={activeStep}
-              isPlaying={isPlaying}
-              onTogglePlaying={toggleAudio}
-              selectedAnswer={selectedAnswer}
-              onSelectAnswer={selectQuizAnswer}
-              activeFunction={activeFunction}
-              onFunction={selectFunction}
-            />
-          </section>
-
-          <LibraryPanel lesson={lesson} highlighted={activeStep === 6} saved={activeStep === 6} />
         </>
       ) : (
         <RecordedLecture
           sessionId={recordedSessionId}
           onTrack={trackRecordedEvent}
+          dotPad={dotPad}
         />
       )}
 
       <footer className="footer-note">
         <span>
-          Prototype environment · Mock AI recognition and DotPad SDK output ·
-          {' '}{isConfigured ? `${syncedCount} events synced to Supabase` : `${pendingCount} events queued locally`}
+          Ambiente de demonstração · Reconhecimento IA simulado · Saída DotPad SDK ·
+          {' '}{isConfigured ? `${syncedCount} eventos sincronizados` : `${pendingCount} eventos na fila local`}
         </span>
-        <span>UFIT × Dot Inc. · Science without barriers</span>
+        <span>UFIT × Dot Inc. · Ciências sem barreiras</span>
       </footer>
     </main>
   )
@@ -461,14 +438,14 @@ function SupabaseStatus({
 }) {
   const label =
     state === 'setup_required'
-      ? 'Supabase setup'
+      ? 'Configurar dados'
       : state === 'syncing'
-        ? 'Syncing data'
+        ? 'Sincronizando'
         : state === 'error'
-          ? 'Sync retry'
+          ? 'Tentar novamente'
           : state === 'synced'
-            ? 'Data synced'
-            : 'Supabase ready'
+            ? 'Dados sincronizados'
+            : 'Dados prontos'
 
   const Icon =
     state === 'setup_required'
@@ -485,7 +462,7 @@ function SupabaseStatus({
     <button
       className={`supabase-pill ${state}`}
       onClick={onRetry}
-      title={error || (configured ? `${syncedCount} events synced` : 'Publishable key required')}
+      title={error || (configured ? `${syncedCount} eventos sincronizados` : 'Chave de acesso necessária')}
       type="button"
     >
       <Icon size={12} className={state === 'syncing' ? 'spin' : ''} />
@@ -526,13 +503,13 @@ function PanelTitle({
   )
 }
 
-function BoardPanel({ lesson, highlighted }: { lesson: Lesson; highlighted: boolean }) {
+function BoardPanel({ lesson }: { lesson: Lesson }) {
   return (
-    <section className={`panel board-panel ${highlighted ? 'focus-panel' : ''}`}>
+    <section className="panel board-panel">
       <PanelTitle
         number="01"
-        eyebrow="SOURCE CLASSROOM"
-        title="UFIT Smart Board"
+        eyebrow="FONTE: SALA DE AULA"
+        title="Lousa UFIT"
         icon={<Eye size={18} />}
       />
       <div className="smartboard-frame">
@@ -563,8 +540,8 @@ function BoardPanel({ lesson, highlighted }: { lesson: Lesson; highlighted: bool
         <div className="lens-corners" aria-hidden="true"><i /><i /><i /><i /></div>
       </div>
       <div className="source-meta">
-        <span><Activity size={13} /> HDMI classroom feed</span>
-        <span className="source-ready"><i /> Source detected</span>
+        <span><Activity size={13} /> Entrada HDMI da sala</span>
+        <span className="source-ready"><i /> Fonte detectada</span>
         <strong>1920 × 1080</strong>
       </div>
     </section>
@@ -722,46 +699,153 @@ function WaterVisual() {
   )
 }
 
-function PipelinePanel({
-  lesson,
-  activeStep,
-  highlighted,
-}: {
-  lesson: Lesson
-  activeStep: number
-  highlighted: boolean
-}) {
+function PipelineStrip({ activeStep, lesson }: { activeStep: number; lesson: Lesson }) {
   const progressByStep = activeStep === 1 ? 0 : activeStep === 2 ? 3 : activeStep === 3 ? 4 : 5
+  const isRunning = activeStep > 1
 
   return (
-    <section className={`panel pipeline-panel ${highlighted ? 'focus-panel' : ''}`}>
-      <PanelTitle
-        number="02"
-        eyebrow="ACCESSIBILITY ENGINE"
-        title="Dot Lens AI Pipeline"
-        icon={<Sparkles size={18} />}
-      />
+    <div className="pipeline-strip" aria-label="Status do pipeline de IA">
+      <span className={`pstrip-engine ${isRunning ? 'running' : ''}`}>
+        <ScanLine size={12} />
+        {isRunning ? 'EM EXECUÇÃO' : 'PRONTO'}
+      </span>
+      <div className="pstrip-steps">
+        {pipeline.map(({ label, Icon }, index) => {
+          const isComplete = index < progressByStep
+          const isCurrent = index === progressByStep && isRunning
+          return (
+            <div key={label} className={`pstrip-step ${isComplete ? 'done' : ''} ${isCurrent ? 'current' : ''}`}>
+              {index > 0 && <div className="pstrip-connector" />}
+              <div className="pstrip-node">
+                {isComplete ? <Check size={10} strokeWidth={3.5} /> : <Icon size={11} />}
+              </div>
+              <span className="pstrip-label">{label}</span>
+            </div>
+          )
+        })}
+      </div>
+      {isRunning && (
+        <span className="pstrip-result">
+          {lesson.detected.confidence} · {lesson.detected.objects.length} obj
+        </span>
+      )}
+    </div>
+  )
+}
+
+type FocalProps = {
+  step: number
+  lesson: Lesson
+  isPlaying: boolean
+  onTogglePlaying: () => void
+  selectedAnswer: number | null
+  onSelectAnswer: (index: number) => void
+  activeFunction: number
+  onFunction: (index: number) => void
+  dotPad: DotPadController
+  onSendScene: () => void
+}
+
+function FocalCanvas(props: FocalProps) {
+  const [outputTab, setOutputTab] = useState<'blind' | 'deaf'>('blind')
+
+  useEffect(() => {
+    if (props.step === 3) setOutputTab('blind')
+    if (props.step === 4) setOutputTab('deaf')
+  }, [props.step])
+
+  if (props.step === 1) return <SourceReadyCanvas lesson={props.lesson} />
+  if (props.step === 2) return <PipelineDetailCanvas lesson={props.lesson} />
+  if (props.step === 6) return <LibraryPanel lesson={props.lesson} highlighted={false} saved />
+
+  return (
+    <div className="focal-output">
+      <div className="output-tabs" role="tablist" aria-label="Modo de saída de acessibilidade">
+        <button
+          role="tab"
+          aria-selected={outputTab === 'blind'}
+          className={outputTab === 'blind' ? 'active' : ''}
+          onClick={() => setOutputTab('blind')}
+        >
+          <CircleDot size={14} />
+          DotPad · Cegueira / Baixa Visão
+          <span className={props.dotPad.status === 'connected' ? 'tab-badge live' : 'tab-badge'}>
+            {props.dotPad.status === 'connected' ? 'AO VIVO' : 'PRÉVIA'}
+          </span>
+        </button>
+        <button
+          role="tab"
+          aria-selected={outputTab === 'deaf'}
+          className={outputTab === 'deaf' ? 'active' : ''}
+          onClick={() => setOutputTab('deaf')}
+        >
+          <Captions size={14} />
+          Legendas · Surdez / D.A.
+          <span className={props.step >= 4 ? 'tab-badge live' : 'tab-badge'}>
+            {props.step >= 4 ? 'ATIVO' : 'ESPERA'}
+          </span>
+        </button>
+      </div>
+      {outputTab === 'blind' ? (
+        <BlindCanvas
+          lesson={props.lesson}
+          activeStep={props.step}
+          isPlaying={props.isPlaying}
+          onTogglePlaying={props.onTogglePlaying}
+          activeFunction={props.activeFunction}
+          onFunction={props.onFunction}
+          dotPad={props.dotPad}
+          onSendScene={props.onSendScene}
+        />
+      ) : (
+        <DeafCanvas
+          lesson={props.lesson}
+          activeStep={props.step}
+          selectedAnswer={props.selectedAnswer}
+          onSelectAnswer={props.onSelectAnswer}
+        />
+      )}
+    </div>
+  )
+}
+
+function SourceReadyCanvas({ lesson }: { lesson: Lesson }) {
+  return (
+    <div className="focal-ready">
+      <div className="focal-ready-icon"><Sparkles size={28} /></div>
+      <h3>Conteúdo da lousa capturado</h3>
+      <p className="focal-ready-desc">{lesson.boardPrompt}</p>
+      <p className="focal-ready-hint">Clique em <strong>Próximo →</strong> para executar o Dot Lens nesta lousa.</p>
+      <div className="focal-ready-features">
+        {pipeline.map(({ label, Icon }) => (
+          <div key={label} className="focal-feature">
+            <Icon size={14} />
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PipelineDetailCanvas({ lesson }: { lesson: Lesson }) {
+  return (
+    <div className="focal-pipeline">
       <div className="ai-status">
         <div className="ai-orb">
           <ScanLine size={22} />
           <span />
         </div>
         <div>
-          <small>DOT LENS MODEL</small>
-          <strong>{activeStep === 1 ? 'Awaiting source' : 'Multimodal analysis active'}</strong>
+          <small>MODELO DOT LENS</small>
+          <strong>Análise multimodal ativa</strong>
         </div>
-        <span className={activeStep > 1 ? 'model-state active' : 'model-state'}>
-          {activeStep > 1 ? 'RUNNING' : 'READY'}
-        </span>
+        <span className="model-state active">EM EXECUÇÃO</span>
       </div>
-
       <div className="pipeline-flow">
         {pipeline.map(({ label, detail, Icon }, index) => {
-          const isComplete = index < progressByStep
-          const isCurrent =
-            (activeStep === 2 && index === Math.min(progressByStep, 2)) ||
-            (activeStep === 3 && index === 3) ||
-            (activeStep === 4 && index === 4)
+          const isComplete = index < 3
+          const isCurrent = index === 2
           return (
             <div key={label} className={`pipeline-row ${isComplete ? 'complete' : ''} ${isCurrent ? 'current' : ''}`}>
               <div className="pipeline-node">
@@ -772,203 +856,154 @@ function PipelinePanel({
                 <span>{detail}</span>
               </div>
               <div className="pipeline-result">
-                {index === 0 && isComplete && `${lesson.detected.objects.length} objects`}
-                {index === 1 && isComplete && `${lesson.detected.textBlocks} blocks`}
-                {index === 2 && isComplete && '1 quiz'}
-                {index === 3 && isComplete && '2,400 pins'}
-                {index === 4 && isComplete && 'PT-BR'}
-                {!isComplete && <span>—</span>}
+                {index === 0 && `${lesson.detected.objects.length} objetos`}
+                {index === 1 && `${lesson.detected.textBlocks} blocos`}
+                {index === 2 && '1 questionário'}
+                {index > 2 && <span>—</span>}
               </div>
               {index < pipeline.length - 1 && <div className="flow-line"><span /></div>}
             </div>
           )
         })}
       </div>
-
       <div className="recognition-card">
         <div className="recognition-head">
-          <span><ScanLine size={14} /> Recognition output</span>
-          <strong>{activeStep > 1 ? lesson.detected.confidence : '—'}</strong>
+          <span><ScanLine size={14} /> Resultado do reconhecimento</span>
+          <strong>{lesson.detected.confidence}</strong>
         </div>
         <div className="detected-tags">
-          {activeStep > 1 ? lesson.detected.objects.map((object) => (
+          {lesson.detected.objects.map((object) => (
             <span key={object}>{object}</span>
-          )) : <span className="placeholder-tag">Waiting for Step 2</span>}
+          ))}
         </div>
         <div className="signal-bars">
           {[72, 91, 84, 96, 77, 89, 94, 86, 98, 81, 93, 88].map((height, index) => (
-            <i key={index} style={{ height: activeStep > 1 ? `${height}%` : '12%' }} />
+            <i key={index} style={{ height: `${height}%` }} />
           ))}
         </div>
       </div>
-
       <div className="privacy-note">
         <Eye size={13} />
-        <span>On-device processing</span>
-        <strong>No student data retained</strong>
+        <span>Processamento local</span>
+        <strong>Nenhum dado de aluno retido</strong>
       </div>
-    </section>
+    </div>
   )
 }
 
-type OutputProps = {
+type BlindCanvasProps = {
   lesson: Lesson
   activeStep: number
   isPlaying: boolean
   onTogglePlaying: () => void
-  selectedAnswer: number | null
-  onSelectAnswer: (index: number) => void
   activeFunction: number
   onFunction: (index: number) => void
+  dotPad: DotPadController
+  onSendScene: () => void
 }
 
-function OutputsPanel(props: OutputProps) {
-  const blindFocus = props.activeStep === 3
-  const deafFocus = props.activeStep === 4
-  const quizFocus = props.activeStep === 5
-
+function BlindCanvas(props: BlindCanvasProps) {
   return (
-    <section className="panel outputs-panel">
-      <PanelTitle
-        number="03"
-        eyebrow="STUDENT EXPERIENCE"
-        title="Accessible Outputs"
-        icon={<Sparkles size={18} />}
-      />
-      <div className="output-stack">
-        <section className={`student-view blind-view ${blindFocus ? 'focus-card' : ''}`}>
-          <div className="student-head">
-            <div className="student-icon blind"><CircleDot size={17} /></div>
-            <div>
-              <span>BLIND / LOW VISION</span>
-              <strong>DotPad Student View</strong>
-            </div>
-            <div className="connected"><i /> CONNECTED</div>
-          </div>
-          <div className="blind-content">
-            <DotPadPreview lesson={props.lesson} ready={props.activeStep >= 3} />
-            <div className="audio-column">
-              <div className="audio-card">
-                <div className="audio-head">
-                  <span><Headphones size={14} /> Audio description</span>
-                  <small>EN · 0:18</small>
-                </div>
-                <p>{props.activeStep >= 3 ? props.lesson.voiceDescription : 'Description will be generated at Step 3.'}</p>
-                <div className="audio-player">
-                  <button onClick={props.onTogglePlaying} disabled={props.activeStep < 3} aria-label="Play audio description">
-                    {props.isPlaying ? <Pause size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
-                  </button>
-                  <div className="audio-wave">
-                    {[35, 62, 44, 76, 52, 88, 67, 48, 79, 58, 92, 63, 42, 72, 54].map((height, index) => (
-                      <i key={index} style={{ height: props.activeStep >= 3 ? `${height}%` : '15%' }} />
-                    ))}
-                  </div>
-                  <Volume2 size={13} />
-                </div>
-              </div>
-              <div className="function-keys">
-                {['Explore', 'Labels', 'Repeat', 'Quiz'].map((label, index) => (
-                  <button
-                    key={label}
-                    className={props.activeFunction === index ? 'active' : ''}
-                    onClick={() => props.onFunction(index)}
-                  >
-                    <span>F{index + 1}</span>{label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className={`student-view deaf-view ${deafFocus || quizFocus ? 'focus-card' : ''}`}>
-          <div className="student-head">
-            <div className="student-icon deaf"><Captions size={17} /></div>
-            <div>
-              <span>DEAF / HARD OF HEARING</span>
-              <strong>Visual Learning View</strong>
-            </div>
-            <div className={props.activeStep >= 4 ? 'connected captions-on' : 'connected'}><i /> {props.activeStep >= 4 ? 'CAPTIONS ON' : 'STANDBY'}</div>
-          </div>
-          <div className="deaf-content">
-            <div className={`caption-card ${deafFocus ? 'inner-focus' : ''}`}>
-              <div className="caption-meta">
-                <span><AudioLines size={13} /> LIVE TRANSCRIPT</span>
-                <small>00:42</small>
-              </div>
-              <p>
-                {props.activeStep >= 4
-                  ? <><span>Prof. Marina</span> {props.lesson.caption}</>
-                  : 'Live classroom captions will appear at Step 4.'}
-              </p>
-              <div className="caption-line"><i style={{ width: props.activeStep >= 4 ? '74%' : '8%' }} /></div>
-            </div>
-            <div className="summary-card">
-              <div className="mini-card-title"><FileText size={13} /> Key summary</div>
-              <ul>
-                {(props.activeStep >= 4 ? props.lesson.summary : ['Summary queued', 'Key terms queued', 'Concept links queued']).map((item, index) => (
-                  <li key={item}><span>{index + 1}</span>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <QuizCard
-              lesson={props.lesson}
-              enabled={props.activeStep >= 5}
-              highlighted={quizFocus}
-              selected={props.selectedAnswer}
-              onSelect={props.onSelectAnswer}
-            />
-          </div>
-        </section>
+    <div className="blind-canvas">
+      <div className="dotpad-stage">
+        <DotPadPreview lesson={props.lesson} ready />
+        <div className="dotpad-stage-actions">
+          <DotPadConnect dotPad={props.dotPad} />
+          <button
+            type="button"
+            className="dotpad-send-btn"
+            disabled={props.dotPad.status !== 'connected'}
+            onClick={props.onSendScene}
+          >
+            <CircleDot size={13} />
+            {props.dotPad.status === 'connected' ? 'Enviar cena ao DotPad' : 'Conecte o DotPad para enviar'}
+          </button>
+        </div>
       </div>
-    </section>
+      <div className="audio-column">
+        <div className="audio-card">
+          <div className="audio-head">
+            <span><Headphones size={14} /> Descrição de áudio</span>
+            <small>PT-BR · 0:18</small>
+          </div>
+          <p>{props.lesson.voiceDescription}</p>
+          <div className="audio-player">
+            <button onClick={props.onTogglePlaying} aria-label="Play audio description">
+              {props.isPlaying ? <Pause size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
+            </button>
+            <div className="audio-wave">
+              {[35, 62, 44, 76, 52, 88, 67, 48, 79, 58, 92, 63, 42, 72, 54].map((height, index) => (
+                <i key={index} style={{ height: `${height}%` }} />
+              ))}
+            </div>
+            <Volume2 size={13} />
+          </div>
+        </div>
+        <div className="function-keys">
+          {['Explorar', 'Rótulos', 'Repetir', 'Questionário'].map((label, index) => (
+            <button
+              key={label}
+              className={props.activeFunction === index ? 'active' : ''}
+              onClick={() => props.onFunction(index)}
+            >
+              <span>F{index + 1}</span>{label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DeafCanvas({
+  lesson,
+  activeStep,
+  selectedAnswer,
+  onSelectAnswer,
+}: {
+  lesson: Lesson
+  activeStep: number
+  selectedAnswer: number | null
+  onSelectAnswer: (index: number) => void
+}) {
+  return (
+    <div className="deaf-canvas">
+      <div className="caption-card">
+        <div className="caption-meta">
+          <span><AudioLines size={13} /> TRANSCRIÇÃO AO VIVO</span>
+          <small>00:42</small>
+        </div>
+        <p>
+          <span>Prof. Marina</span> {lesson.caption}
+        </p>
+        <div className="caption-line">
+          <i style={{ width: activeStep >= 4 ? '74%' : '8%' }} />
+        </div>
+      </div>
+      <div className="summary-card">
+        <div className="mini-card-title"><FileText size={13} /> Resumo principal</div>
+        <ul>
+          {lesson.summary.map((item, index) => (
+            <li key={item}><span>{index + 1}</span>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <QuizCard
+        lesson={lesson}
+        enabled={activeStep >= 5}
+        highlighted={activeStep === 5}
+        selected={selectedAnswer}
+        onSelect={onSelectAnswer}
+      />
+    </div>
   )
 }
 
 function DotPadPreview({ lesson, ready }: { lesson: Lesson; ready: boolean }) {
-  const dots = useMemo(() => {
-    const result: { x: number; y: number; raised: boolean }[] = []
-    for (let y = 0; y < 40; y += 1) {
-      for (let x = 0; x < 60; x += 1) {
-        let raised = false
-        if (ready) {
-          if (lesson.id === 'plant') {
-            const stem = Math.abs(x - 30) < 1 && y > 9 && y < 30
-            const flower = Math.hypot(x - 30, y - 8) < 5 && Math.hypot(x - 30, y - 8) > 2.2
-            const leafLeft = ((x - 23) / 8) ** 2 + ((y - 17) / 4) ** 2 < 1
-            const leafRight = ((x - 37) / 8) ** 2 + ((y - 14) / 4) ** 2 < 1
-            const soil = y === 30 && x > 5 && x < 55
-            const roots = y > 29 && (
-              Math.abs(x - (30 - (y - 29) * .7)) < 1 ||
-              Math.abs(x - (30 + (y - 29) * .75)) < 1 ||
-              Math.abs(x - 30) < 1
-            )
-            raised = stem || flower || leafLeft || leafRight || soil || roots
-          } else if (lesson.id === 'solar') {
-            const sun = Math.hypot(x - 10, y - 20) < 5
-            const orbit1 = Math.abs(((x - 10) / 15) ** 2 + ((y - 20) / 7) ** 2 - 1) < .16
-            const orbit2 = Math.abs(((x - 10) / 25) ** 2 + ((y - 20) / 12) ** 2 - 1) < .12
-            const orbit3 = Math.abs(((x - 10) / 37) ** 2 + ((y - 20) / 17) ** 2 - 1) < .1
-            const planet = Math.hypot(x - 35, y - 12) < 2.2
-            raised = sun || orbit1 || orbit2 || orbit3 || planet
-          } else {
-            const sea = y === 31 + Math.round(Math.sin(x / 4)) && x > 2 && x < 57
-            const mountain = (Math.abs(y - (31 - Math.abs(x - 43) * .7)) < 1 && x > 31 && x < 55)
-            const cloud = (
-              Math.hypot(x - 34, y - 10) < 4 ||
-              Math.hypot(x - 40, y - 9) < 5 ||
-              Math.hypot(x - 46, y - 11) < 4
-            )
-            const rain = x > 34 && x < 49 && y > 14 && y < 25 && (x + y) % 5 === 0
-            const vapor = x > 12 && x < 22 && y > 15 && y < 30 && (x - y) % 5 === 0
-            raised = sea || mountain || cloud || rain || vapor
-          }
-        }
-        result.push({ x, y, raised })
-      }
-    }
-    return result
-  }, [lesson.id, ready])
+  const dots = useMemo(
+    () => matrixToDots(buildLiveMatrix(lesson.id, ready)),
+    [lesson.id, ready],
+  )
 
   return (
     <div className="dotpad-shell">
@@ -1012,8 +1047,8 @@ function QuizCard({
 }) {
   return (
     <div className={`quiz-card ${highlighted ? 'inner-focus' : ''}`}>
-      <div className="mini-card-title"><ScanLine size={13} /> Accessible quiz <span>1 / 3</span></div>
-      <p>{enabled ? lesson.quiz.question : 'Quiz becomes available at Step 5.'}</p>
+      <div className="mini-card-title"><ScanLine size={13} /> Questionário acessível <span>1 / 3</span></div>
+      <p>{enabled ? lesson.quiz.question : 'O questionário estará disponível na Etapa 5.'}</p>
       <div className="quiz-options">
         {lesson.quiz.options.map((option, index) => {
           const isSelected = selected === index
@@ -1051,25 +1086,25 @@ function LibraryPanel({
       <div className="library-header">
         <div className="library-title-icon"><Library size={20} /></div>
         <div>
-          <span>SHARED ACCESSIBLE CONTENT REPOSITORY</span>
-          <h2>Tactile World Science Library</h2>
+          <span>REPOSITÓRIO DE CONTEÚDO ACESSÍVEL</span>
+          <h2>Biblioteca Tátil Dot Inc – Ciências</h2>
         </div>
-        <p>Every converted lesson becomes a reusable, searchable accessibility package for teachers and students.</p>
+        <p>Cada aula convertida vira um pacote de acessibilidade reutilizável e pesquisável para professores e alunos.</p>
         <button className={saved ? 'saved' : ''}>
           {saved ? <Check size={14} /> : <BookOpen size={14} />}
-          {saved ? 'Saved to library' : 'Browse 1,284 assets'}
+          {saved ? 'Salvo na biblioteca' : 'Explorar 1.284 recursos'}
         </button>
       </div>
 
       <div className="library-flow">
         <div className="library-stat">
-          <strong>1,284</strong><span>Tactile graphics</span>
+          <strong>1.284</strong><span>Gráficos táteis</span>
         </div>
         <div className="library-stat">
-          <strong>312</strong><span>Science lessons</span>
+          <strong>312</strong><span>Aulas de ciências</span>
         </div>
         <div className="library-stat">
-          <strong>18</strong><span>Languages</span>
+          <strong>18</strong><span>Idiomas</span>
         </div>
         <div className="asset-card featured">
           <div className="asset-preview" style={{ background: lesson.accentSoft }}>
@@ -1079,24 +1114,24 @@ function LibraryPanel({
             </div>
           </div>
           <div className="asset-copy">
-            <span className="new-asset">{saved ? 'JUST SAVED' : 'CURRENT LESSON'}</span>
+            <span className="new-asset">{saved ? 'RECÉM SALVO' : 'AULA ATUAL'}</span>
             <h3>{lesson.library.asset}</h3>
-            <p>{lesson.grade} · {lesson.library.pages} tactile pages · Audio + captions + quiz</p>
+            <p>{lesson.grade} · {lesson.library.pages} páginas táteis · Áudio + legendas + questionário</p>
             <div className="asset-tags">{lesson.library.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
           </div>
           <div className="asset-version">
             <strong>{lesson.library.version}</strong>
-            <span>{saved ? 'Synced now' : 'Draft package'}</span>
+            <span>{saved ? 'Sincronizado agora' : 'Pacote em rascunho'}</span>
           </div>
         </div>
         <div className="asset-card compact">
           <div className="compact-icon"><Waves size={19} /></div>
-          <div><span>COLLECTION</span><strong>Brazil Science Essentials</strong><small>42 accessible packages</small></div>
+          <div><span>COLEÇÃO</span><strong>Essenciais de Ciências – Brasil</strong><small>42 pacotes acessíveis</small></div>
           <ChevronRight size={16} />
         </div>
         <div className="asset-card compact">
           <div className="compact-icon purple"><Sun size={19} /></div>
-          <div><span>MOST USED</span><strong>Earth & Space</strong><small>98% teacher rating</small></div>
+          <div><span>MAIS USADO</span><strong>Terra e Espaço</strong><small>98% aprovação docente</small></div>
           <ChevronRight size={16} />
         </div>
       </div>
