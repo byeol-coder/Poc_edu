@@ -1,0 +1,1010 @@
+/* =====================================================================
+   Dot Lens × UFIT — Science Accessibility PoC
+   Design system (theme.css)
+   Loaded AFTER styles.css so these tokens and rules take precedence.
+   Source of truth for the partner-facing landing + the embedded simulation.
+   ===================================================================== */
+
+:root {
+  /* Brand */
+  --ds-primary: #00c896;
+  --ds-primary-600: #00b489;
+  --ds-primary-700: #009b76; /* AA text/icon on white */
+  --ds-primary-050: #e4f8f1;
+  --ds-lavender: #7c6cf2;
+  --ds-lavender-050: #ece9fe;
+  --ds-lavender-700: #5b4bd6;
+  --ds-sky: #2bb3e0;
+  --ds-sky-050: #e3f4fb;
+
+  /* Ink */
+  --ds-ink-strong: #2a2f36;
+  --ds-ink: #424242;
+  --ds-ink-muted: #5f6b78;
+  --ds-ink-faint: #8a939e;
+
+  /* Surfaces */
+  --ds-bg: #fafafb;
+  --ds-surface: #ffffff;
+  --ds-surface-subtle: #f6f8f9;
+  --ds-line: #eceef1;
+  --ds-line-strong: #e1e5ea;
+
+  /* Section washes */
+  --ds-wash-mint: #edf9f6;
+  --ds-wash-lavender: #faf5ff;
+
+  /* Radii */
+  --r-card: 16px;
+  --r-btn: 8px;
+  --r-banner: 24px;
+  --r-pill: 999px;
+
+  /* Light diffuse shadows only */
+  --sh-1: 0 1px 2px rgba(22, 33, 45, 0.04), 0 1px 3px rgba(22, 33, 45, 0.05);
+  --sh-2: 0 6px 20px rgba(22, 33, 45, 0.06);
+  --sh-focus: 0 0 0 3px rgba(0, 200, 150, 0.32);
+
+  /* Type */
+  --ds-font-display: "Plus Jakarta Sans", "Noto Sans KR", "Inter", ui-sans-serif,
+    system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ds-font-body: "Inter", "Noto Sans KR", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+
+  /* Layout */
+  --ds-maxw: 1120px;
+  --ds-gutter: 24px;
+}
+
+/* ---- Bridge: remap legacy simulation tokens onto the new system -------- */
+:root {
+  --font-body: var(--ds-font-body);
+  --font-display: var(--ds-font-display);
+  --ink-strong: var(--ds-ink-strong);
+  --ink: var(--ds-ink);
+  --ink-muted: var(--ds-ink-muted);
+  --ink-faint: var(--ds-ink-faint);
+  --surface-solid: var(--ds-surface);
+  --surface-subtle: var(--ds-surface-subtle);
+  --line: var(--ds-line);
+  --line-soft: var(--ds-line);
+  --shadow-xs: var(--sh-1);
+  --shadow-sm: var(--sh-1);
+  --shadow-md: var(--sh-2);
+  --radius-sm: var(--r-btn);
+  --radius-md: 12px;
+  --radius-lg: var(--r-card);
+  color: var(--ds-ink);
+  background: var(--ds-bg);
+}
+
+/* Make the whole document responsive (legacy set min-width:1180px) and quiet */
+html {
+  scroll-behavior: smooth;
+}
+body {
+  min-width: 0;
+  background: var(--ds-bg);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+*:focus-visible {
+  outline: 2px solid var(--ds-primary-700);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* =====================================================================
+   Page shell + navigation
+   ===================================================================== */
+.dl-page {
+  font-family: var(--ds-font-body);
+  color: var(--ds-ink);
+  background: var(--ds-bg);
+  min-height: 100vh;
+}
+.dl-container {
+  width: 100%;
+  max-width: var(--ds-maxw);
+  margin: 0 auto;
+  padding-inline: var(--ds-gutter);
+}
+
+.dl-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid var(--ds-line);
+}
+.dl-nav-inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dl-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ds-ink-strong);
+}
+.dl-mark {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 3px;
+  padding: 9px;
+  border-radius: 10px;
+  background: var(--ds-ink-strong);
+}
+.dl-mark span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.45;
+}
+.dl-mark span:nth-child(1),
+.dl-mark span:nth-child(5),
+.dl-mark span:nth-child(9) {
+  opacity: 1;
+  background: var(--ds-primary);
+}
+.dl-brand-name {
+  font-family: var(--ds-font-display);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.1;
+}
+.dl-brand-sub {
+  font-size: 11px;
+  color: var(--ds-ink-muted);
+  font-weight: 500;
+}
+.dl-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.dl-nav-links a {
+  color: var(--ds-ink-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.dl-nav-links a:hover {
+  color: var(--ds-ink-strong);
+}
+.dl-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dl-lang {
+  display: inline-flex;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  background: #fff;
+}
+.dl-lang button {
+  border: 0;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ds-ink-muted);
+  cursor: pointer;
+}
+.dl-lang button.active {
+  background: var(--ds-ink-strong);
+  color: #fff;
+}
+
+/* =====================================================================
+   Buttons
+   ===================================================================== */
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: var(--r-btn);
+  font-family: var(--ds-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.ds-btn--primary {
+  background: var(--ds-primary);
+  color: #04261d;
+}
+.ds-btn--primary:hover {
+  background: var(--ds-primary-600);
+}
+.ds-btn--secondary {
+  background: #fff;
+  color: var(--ds-ink-strong);
+  border-color: var(--ds-line-strong);
+}
+.ds-btn--secondary:hover {
+  border-color: var(--ds-primary);
+  color: var(--ds-primary-700);
+}
+.ds-btn--ghost {
+  background: transparent;
+  color: var(--ds-ink-muted);
+  height: 38px;
+  padding: 0 12px;
+}
+.ds-btn--ghost:hover {
+  color: var(--ds-ink-strong);
+}
+.ds-btn--sm {
+  height: 38px;
+  font-size: 14px;
+  padding: 0 16px;
+}
+
+/* =====================================================================
+   Badge / eyebrow / pill
+   ===================================================================== */
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 11px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--ds-primary-050);
+  color: var(--ds-primary-700);
+}
+.ds-badge--lavender {
+  background: var(--ds-lavender-050);
+  color: var(--ds-lavender-700);
+}
+.ds-badge--neutral {
+  background: var(--ds-surface-subtle);
+  color: var(--ds-ink-muted);
+  border: 1px solid var(--ds-line);
+}
+.ds-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ds-primary-700);
+}
+
+/* =====================================================================
+   Section + headings
+   ===================================================================== */
+.ds-section {
+  padding-block: 84px;
+}
+.ds-section--wash {
+  background: linear-gradient(165deg, var(--ds-wash-mint), var(--ds-wash-lavender));
+}
+.ds-section--subtle {
+  background: var(--ds-surface-subtle);
+}
+.ds-section-head {
+  max-width: 720px;
+  margin-bottom: 44px;
+}
+.ds-section-head.center {
+  margin-inline: auto;
+  text-align: center;
+}
+.ds-h2 {
+  font-family: var(--ds-font-display);
+  font-weight: 700;
+  font-size: clamp(26px, 3.4vw, 36px);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: var(--ds-ink-strong);
+  margin: 12px 0 0;
+}
+.ds-lead {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ds-ink-muted);
+  margin: 14px 0 0;
+}
+
+/* =====================================================================
+   Card
+   ===================================================================== */
+.ds-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sh-1);
+  padding: 24px;
+}
+.ds-card--flat {
+  box-shadow: none;
+}
+.ds-card-title {
+  font-family: var(--ds-font-display);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--ds-ink-strong);
+  margin: 0;
+}
+.ds-card-text {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ds-ink-muted);
+  margin: 8px 0 0;
+}
+.ds-icon-chip {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--ds-primary-050);
+  color: var(--ds-primary-700);
+}
+.ds-icon-chip--lavender {
+  background: var(--ds-lavender-050);
+  color: var(--ds-lavender-700);
+}
+.ds-icon-chip--sky {
+  background: var(--ds-sky-050);
+  color: #1486ad;
+}
+
+/* =====================================================================
+   HERO
+   ===================================================================== */
+.dl-hero {
+  position: relative;
+  background: linear-gradient(168deg, var(--ds-wash-mint) 0%, var(--ds-wash-lavender) 70%, #fff 100%);
+  border-bottom: 1px solid var(--ds-line);
+  overflow: hidden;
+}
+.dl-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+  padding-block: 76px;
+}
+.dl-hero h1 {
+  font-family: var(--ds-font-display);
+  font-weight: 800;
+  font-size: clamp(32px, 4.4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ds-ink-strong);
+  margin: 18px 0 0;
+}
+.dl-hero h1 .accent {
+  color: var(--ds-primary-700);
+}
+.dl-hero-sub {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ds-ink-muted);
+  margin: 18px 0 0;
+  max-width: 36ch;
+}
+.dl-hero-cta {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.dl-hero-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--ds-ink-muted);
+}
+.dl-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+/* Signature: the "accessibility layer over the UFIT lesson" mockup */
+.dl-layerstack {
+  position: relative;
+}
+.dl-screen {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--r-banner);
+  box-shadow: var(--sh-2);
+  overflow: hidden;
+}
+.dl-screen-bar {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--ds-line);
+  background: var(--ds-surface-subtle);
+}
+.dl-screen-bar i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ds-line-strong);
+}
+.dl-screen-bar small {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ds-ink-faint);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.dl-screen-body {
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+.dl-ufit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dl-ufit-logo {
+  font-family: var(--ds-font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--ds-ink-strong);
+  letter-spacing: -0.01em;
+}
+.dl-ufit-logo span {
+  color: var(--ds-primary-700);
+  font-weight: 700;
+}
+.dl-ufit-tag {
+  font-size: 11px;
+  color: var(--ds-ink-faint);
+  font-weight: 600;
+}
+.dl-ufit-figure {
+  border: 1px solid var(--ds-line);
+  border-radius: 12px;
+  background: var(--ds-surface-subtle);
+  padding: 16px;
+  display: grid;
+  place-items: center;
+}
+.dl-lens-layer {
+  border: 1.5px dashed var(--ds-primary);
+  border-radius: 14px;
+  background: rgba(0, 200, 150, 0.05);
+  padding: 12px 14px;
+}
+.dl-lens-layer-top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-primary-700);
+}
+.dl-lens-outs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+.dl-lens-out {
+  background: #fff;
+  border: 1px solid var(--ds-line);
+  border-radius: 10px;
+  padding: 9px 8px;
+  text-align: center;
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+}
+.dl-lens-out span {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ds-ink-muted);
+}
+.dl-float-card {
+  position: absolute;
+  right: -18px;
+  bottom: 26px;
+  width: 196px;
+  background: #fff;
+  border: 1px solid var(--ds-line);
+  border-radius: 14px;
+  box-shadow: var(--sh-2);
+  padding: 12px 13px;
+}
+.dl-float-card .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dl-float-card strong {
+  font-size: 13px;
+  color: var(--ds-ink-strong);
+}
+.dl-float-card p {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--ds-ink-muted);
+}
+
+/* =====================================================================
+   Generic grids
+   ===================================================================== */
+.dl-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.dl-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.dl-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* =====================================================================
+   Solution flow (image -> tactile -> dotpad -> audio/text -> participation)
+   ===================================================================== */
+.dl-flowline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.dl-flownode {
+  flex: 1 1 0;
+  min-width: 150px;
+  background: #fff;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sh-1);
+  padding: 18px 16px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.dl-flownode h4 {
+  font-family: var(--ds-font-display);
+  font-size: 14.5px;
+  margin: 0;
+  color: var(--ds-ink-strong);
+}
+.dl-flownode p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ds-ink-muted);
+  margin: 0;
+}
+.dl-flowarrow {
+  display: grid;
+  place-items: center;
+  color: var(--ds-primary);
+  padding: 0 6px;
+  flex: 0 0 auto;
+}
+
+/* =====================================================================
+   Classroom Flow — StepCard
+   ===================================================================== */
+.ds-step-card {
+  background: #fff;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sh-1);
+  padding: 22px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  position: relative;
+}
+.ds-step-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--ds-ink-strong);
+  color: #fff;
+  font-family: var(--ds-font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.ds-step-role {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ds-primary-700);
+}
+.ds-step-card h3 {
+  font-family: var(--ds-font-display);
+  font-size: 16px;
+  margin: 0;
+  color: var(--ds-ink-strong);
+}
+.ds-step-card p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ds-ink-muted);
+  margin: 0;
+}
+
+/* =====================================================================
+   PoC Simulation panel wrapper (frames the embedded live simulation)
+   ===================================================================== */
+.ds-sim-panel {
+  background: #fff;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--r-banner);
+  box-shadow: var(--sh-2);
+  overflow: hidden;
+}
+.ds-sim-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--ds-line);
+  background: var(--ds-surface-subtle);
+}
+.ds-sim-head .label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--ds-font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ds-ink-strong);
+}
+.ds-sim-head .note {
+  font-size: 12px;
+  color: var(--ds-ink-muted);
+}
+.ds-sim-body {
+  padding: 18px;
+}
+/* Tile sample chips (compare original vs accessible outputs) */
+.dl-compare {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.dl-compare-tile {
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  padding: 14px;
+  background: #fff;
+  box-shadow: var(--sh-1);
+}
+.dl-compare-tile .cap {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-ink-faint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dl-compare-tile p {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ds-ink);
+}
+
+/* =====================================================================
+   Accessibility value — audience cards
+   ===================================================================== */
+.dl-aud-card {
+  background: #fff;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sh-1);
+  padding: 22px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.dl-aud-card ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 9px;
+}
+.dl-aud-card li {
+  display: flex;
+  gap: 9px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ds-ink-muted);
+}
+.dl-aud-card li svg {
+  color: var(--ds-primary-700);
+  margin-top: 2px;
+}
+
+/* =====================================================================
+   Partner integration — three lanes
+   ===================================================================== */
+.dl-int-card {
+  background: #fff;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sh-1);
+  padding: 22px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.dl-int-card code {
+  display: inline-block;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  background: var(--ds-surface-subtle);
+  border: 1px solid var(--ds-line);
+  border-radius: 6px;
+  padding: 3px 8px;
+  color: var(--ds-ink-strong);
+  width: fit-content;
+}
+.dl-expand {
+  margin-top: 16px;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.dl-expand-row {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ds-line);
+  align-items: start;
+}
+.dl-expand-row:last-child { border-bottom: 0; }
+.dl-expand-row .n {
+  font-family: var(--ds-font-display);
+  font-weight: 700;
+  color: var(--ds-primary-700);
+}
+.dl-expand-row strong { color: var(--ds-ink-strong); font-size: 14.5px; }
+.dl-expand-row p { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--ds-ink-muted); }
+
+/* =====================================================================
+   Pilot roadmap — horizontal phased timeline
+   ===================================================================== */
+.dl-road {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  position: relative;
+}
+.dl-road-step {
+  position: relative;
+  padding: 0 14px;
+}
+.dl-road-step::before {
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ds-line-strong);
+}
+.dl-road-step:first-child::before { left: 50%; }
+.dl-road-step:last-child::before { right: 50%; }
+.dl-road-dot {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 2px solid var(--ds-primary);
+  color: var(--ds-primary-700);
+  font-weight: 700;
+  font-size: 13px;
+  margin: 0 auto;
+}
+.dl-road-step.target .dl-road-dot {
+  background: var(--ds-primary);
+  color: #04261d;
+}
+.dl-road-body { text-align: center; margin-top: 14px; }
+.dl-road-phase {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-ink-faint);
+}
+.dl-road-body h4 {
+  font-family: var(--ds-font-display);
+  font-size: 14.5px;
+  margin: 6px 0 0;
+  color: var(--ds-ink-strong);
+}
+.dl-road-body p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ds-ink-muted);
+  margin: 6px 0 0;
+}
+
+/* =====================================================================
+   Final CTA + footer
+   ===================================================================== */
+.dl-final {
+  background: linear-gradient(165deg, var(--ds-wash-mint), var(--ds-wash-lavender));
+}
+.dl-final-card {
+  background: var(--ds-ink-strong);
+  border-radius: var(--r-banner);
+  padding: 56px 48px;
+  text-align: center;
+  box-shadow: var(--sh-2);
+}
+.dl-final-card h2 {
+  font-family: var(--ds-font-display);
+  font-weight: 800;
+  font-size: clamp(24px, 3.2vw, 34px);
+  line-height: 1.2;
+  color: #fff;
+  margin: 0 auto;
+  max-width: 22ch;
+}
+.dl-final-card p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 16px auto 0;
+  max-width: 56ch;
+}
+.dl-final-card .dl-hero-cta { justify-content: center; margin-top: 28px; }
+.dl-footer {
+  border-top: 1px solid var(--ds-line);
+  background: #fff;
+}
+.dl-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 28px;
+  font-size: 13px;
+  color: var(--ds-ink-muted);
+  flex-wrap: wrap;
+}
+
+/* =====================================================================
+   Embedded simulation — align legacy chrome to the new system
+   ===================================================================== */
+.sim-shell {
+  --accent: var(--ds-primary);
+  --accent-soft: var(--ds-primary-050);
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.sim-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.sim-toolbar-mode {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--ds-surface-subtle);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-pill);
+}
+.sim-toolbar-mode button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--r-pill);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ds-ink-muted);
+  cursor: pointer;
+}
+.sim-toolbar-mode button.active {
+  background: #fff;
+  color: var(--ds-ink-strong);
+  box-shadow: var(--sh-1);
+}
+.sim-footnote {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ds-ink-faint);
+}
+
+/* Soften the legacy workspace surfaces: lighter radii, no heavy shadow */
+.sim-shell .opbar {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sh-1);
+  backdrop-filter: none;
+}
+.sim-shell .panel,
+.sim-shell .library-section,
+.sim-shell .recorded-shell,
+.sim-shell .student-view {
+  box-shadow: var(--sh-1);
+  border-radius: var(--r-card);
+}
+.sim-shell .next-step {
+  border-radius: var(--r-btn);
+}
+.sim-shell .lesson-tab.active {
+  color: var(--ds-primary-700);
+}
+
+/* =====================================================================
+   Responsive
+   ===================================================================== */
+@media (max-width: 960px) {
+  .dl-hero-grid { grid-template-columns: 1fr; gap: 36px; padding-block: 52px; }
+  .dl-hero-sub { max-width: none; }
+  .dl-float-card { position: static; width: auto; margin-top: 14px; }
+  .dl-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .dl-grid-3 { grid-template-columns: 1fr; }
+  .dl-grid-2 { grid-template-columns: 1fr; }
+  .dl-compare { grid-template-columns: repeat(2, 1fr); }
+  .dl-road { grid-template-columns: 1fr; gap: 22px; }
+  .dl-road-step { padding: 0; display: grid; grid-template-columns: 28px 1fr; gap: 14px; text-align: left; }
+  .dl-road-step::before { display: none; }
+  .dl-road-dot { margin: 0; }
+  .dl-road-body { text-align: left; margin-top: 0; }
+  .dl-flowline { flex-direction: column; }
+  .dl-flowarrow { transform: rotate(90deg); padding: 4px 0; }
+  .ds-section { padding-block: 56px; }
+  .dl-nav-links { display: none; }
+}
+@media (max-width: 560px) {
+  .dl-grid-4 { grid-template-columns: 1fr; }
+  .dl-compare { grid-template-columns: 1fr; }
+  .dl-final-card { padding: 36px 22px; }
+  .dl-hero-cta .ds-btn { width: 100%; }
+}

@@ -45,8 +45,8 @@ export const lessons: Lesson[] = [
     boardPrompt: 'Como cada parte ajuda a planta a viver?',
     duration: '12 min',
     grade: 'Grade 5',
-    accent: '#31c88a',
-    accentSoft: '#dff8ec',
+    accent: '#00C896',
+    accentSoft: '#E4F8F1',
     voiceDescription:
       'A vertical plant diagram. Roots spread below the soil line, a stem rises through the center, and two leaves connect on opposite sides. A flower sits at the top.',
     caption:
@@ -84,8 +84,8 @@ export const lessons: Lesson[] = [
     boardPrompt: 'Por que os planetas não saem de suas órbitas?',
     duration: '15 min',
     grade: 'Grade 6',
-    accent: '#7c6cf2',
-    accentSoft: '#ebe8ff',
+    accent: '#7C6CF2',
+    accentSoft: '#ECE9FE',
     voiceDescription:
       'A top-down map of the solar system. The Sun is the large circle on the left. Four curved orbital paths extend right, with Earth shown as the third planet.',
     caption:
@@ -123,8 +123,8 @@ export const lessons: Lesson[] = [
     boardPrompt: 'Como a mesma água viaja pela Terra?',
     duration: '11 min',
     grade: 'Grade 5',
-    accent: '#36a9e8',
-    accentSoft: '#e1f4ff',
+    accent: '#2BB3E0',
+    accentSoft: '#E3F4FB',
     voiceDescription:
       'A landscape diagram showing the water cycle. Water rises from the sea as evaporation, forms clouds through condensation, falls as rain, and returns downhill as collection.',
     caption:
